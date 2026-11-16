@@ -1,0 +1,96 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;background:#fff}
+svg{display:block;font-family:"Times New Roman",Times,serif}
+.b{fill:#fff;stroke:#000;stroke-width:1.4}
+.g{fill:#efefef;stroke:#000;stroke-width:1.4}
+.t{font-size:16px;font-weight:bold;text-anchor:middle}
+.s{font-size:13.5px;text-anchor:middle}
+.l{font-size:13px;font-style:italic;text-anchor:middle}
+.a{stroke:#000;stroke-width:1.4;fill:none;marker-end:url(#ar)}
+.d{stroke:#000;stroke-width:1.2;fill:none;stroke-dasharray:5 4;marker-end:url(#ar)}
+</style></head><body>
+<svg width="760" height="610" viewBox="0 0 760 610" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z"/></marker></defs>
+
+<!-- sources and connector layer -->
+<rect class="g" x="20" y="18" width="210" height="80" rx="4"/>
+<text class="t" x="125" y="43">Relational sources</text>
+<text class="s" x="125" y="64">PostgreSQL · MySQL · SQL Server</text>
+<text class="s" x="125" y="82">Azure SQL Database · SQLite</text>
+<rect class="b" x="262" y="18" width="478" height="80" rx="4"/>
+<text class="t" x="501" y="43">Connector Layer</text>
+<text class="s" x="501" y="64">schema metadata (T, C, K) and sample rows (Δ)</text>
+<text class="s" x="501" y="82">streaming reads · incremental windows · SQL aggregates</text>
+<line class="a" x1="230" y1="58" x2="260" y2="58"/>
+
+<!-- agent manager frame -->
+<rect x="10" y="120" width="740" height="352" rx="6" fill="none" stroke="#000" stroke-width="1.2" stroke-dasharray="7 4"/>
+<text class="l" x="380" y="139">Agent Manager: three-stage verification</text>
+
+<rect class="g" x="30" y="158" width="150" height="62" rx="4"/>
+<text class="t" x="105" y="184">1. Request</text>
+<text class="t" x="105" y="203">verification</text>
+
+<rect class="b" x="220" y="158" width="192" height="62" rx="4"/>
+<text class="t" x="316" y="184">Schema Mapper</text>
+<text class="s" x="316" y="205">rules (H2) or AI model (S3)</text>
+<line class="a" x1="180" y1="189" x2="218" y2="189"/>
+
+<rect class="g" x="452" y="158" width="278" height="62" rx="4"/>
+<text class="t" x="591" y="184">Precedent store</text>
+<text class="s" x="591" y="205">mappings from past migrations (TF-IDF)</text>
+<line class="a" x1="452" y1="189" x2="414" y2="189"/>
+
+<rect class="g" x="220" y="252" width="192" height="66" rx="4"/>
+<text class="t" x="316" y="276">2. Execution</text>
+<text class="t" x="316" y="295">verification</text>
+<text class="s" x="316" y="311">dry run on Δ</text>
+<line class="a" x1="316" y1="220" x2="316" y2="250"/>
+<text class="s" x="324" y="240" style="text-anchor:start">mapping μ</text>
+<path class="d" d="M220,300 H198 V212 H218"/>
+<text class="l" x="105" y="262">one bounded</text>
+<text class="l" x="105" y="278">self-repair round</text>
+
+<rect class="b" x="452" y="248" width="278" height="74" rx="4"/>
+<text class="t" x="591" y="272">AI assistant (local LLM)</text>
+<text class="s" x="591" y="292">mapping review · privacy check</text>
+<text class="s" x="591" y="310">plain-language summary</text>
+<path class="d" d="M452,285 H414"/>
+<text class="l" x="591" y="340">suggestions are accepted by the user</text>
+
+<rect class="b" x="220" y="352" width="192" height="80" rx="4"/>
+<text class="t" x="316" y="376">Migration Executor</text>
+<text class="s" x="316" y="396">convert · mask · partition</text>
+<text class="s" x="316" y="414">in-memory or streaming</text>
+<line class="a" x1="316" y1="318" x2="316" y2="350"/>
+
+<rect class="b" x="452" y="352" width="278" height="104" rx="4"/>
+<text class="t" x="591" y="376">3. Validation and Reconciliation</text>
+<text class="s" x="591" y="397">schema-aware checks generated from μ</text>
+<text class="s" x="591" y="415">every value recomputed (ρ)</text>
+<text class="s" x="591" y="433">per-partition fingerprints</text>
+<text class="s" x="591" y="451">database cross-check</text>
+
+<!-- outside the frame -->
+<rect class="g" x="20" y="500" width="170" height="92" rx="4"/>
+<text class="t" x="105" y="525">Interfaces</text>
+<text class="s" x="105" y="546">web dashboard (multi-user)</text>
+<text class="s" x="105" y="564">command line, job files</text>
+<text class="s" x="105" y="582">schedulers (exit codes)</text>
+
+<rect class="g" x="220" y="500" width="192" height="92" rx="4"/>
+<text class="t" x="316" y="525">Target storage</text>
+<text class="s" x="316" y="546">local · S3 / MinIO</text>
+<text class="s" x="316" y="564">ADLS Gen2 · GCS</text>
+<text class="s" x="316" y="582">Parquet · CSV · Delta · Iceberg</text>
+<line class="a" x1="316" y1="432" x2="316" y2="498"/>
+<path class="a" d="M412,530 H432 V420 H450"/>
+<text class="l" x="426" y="482" style="text-anchor:end">read back</text>
+
+<rect class="b" x="452" y="500" width="278" height="92" rx="4"/>
+<text class="t" x="591" y="525">Reconciliation report</text>
+<text class="s" x="591" y="546">verdict and evidence for every check</text>
+<text class="s" x="591" y="564">dashboard · JSON · Markdown</text>
+<text class="s" x="591" y="582">failed partitions named</text>
+<line class="a" x1="660" y1="456" x2="660" y2="498"/>
+</svg></body></html>

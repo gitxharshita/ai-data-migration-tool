@@ -1,0 +1,290 @@
+﻿LLM: OllamaClient qwen2.5:7b
+building corpus, precedents and injected runs ...
+source: SQLite; target: local filesystem
+strategy h1
+  [h1] ecommerce.customers        valid=True  MA=5/5   0.09s
+  [h1] ecommerce.products         valid=True  MA=5/5   0.21s
+  [h1] ecommerce.orders           valid=True  MA=6/6   0.54s
+  [h1] ecommerce.order_items      valid=True  MA=5/5   0.10s
+  [h1] ecommerce.payments         valid=True  MA=5/6   1.07s
+  [h1] ecommerce.carts            valid=True  MA=4/6   1.12s
+  [h1] healthcare.patients         valid=True  MA=5/5   0.05s
+  [h1] healthcare.providers        valid=True  MA=4/4   0.04s
+  [h1] healthcare.encounters       valid=True  MA=5/5   0.47s
+  [h1] healthcare.claims           valid=True  MA=6/6   0.75s
+  [h1] healthcare.claim_lines      valid=True  MA=5/5   0.25s
+  [h1] healthcare.prescriptions    valid=True  MA=4/6   0.36s
+  [h1] healthcare.lab_results      valid=True  MA=6/6   0.63s
+  [h1] hr_payroll.departments      valid=True  MA=3/3   0.03s
+  [h1] hr_payroll.employees        valid=True  MA=6/6   0.06s
+  [h1] hr_payroll.payroll_runs     valid=True  MA=4/5   0.81s
+  [h1] hr_payroll.payslips         valid=True  MA=7/8   0.14s
+  [h1] hr_payroll.leave_requests   valid=True  MA=5/5   0.06s
+  [h1] hr_payroll.timesheets       valid=True  MA=5/5   0.08s
+  [h1] logistics.warehouses       valid=True  MA=4/4   0.12s
+  [h1] logistics.shipments        valid=True  MA=6/6   0.95s
+  [h1] logistics.tracking_events  valid=True  MA=2/5   0.31s
+  [h1] logistics.vehicles         valid=True  MA=4/4   0.06s
+  [h1] logistics.drivers          valid=True  MA=3/4   0.09s
+  [h1] logistics.routes           valid=True  MA=5/6   0.54s
+  [h1] subscription.plans            valid=True  MA=4/4   0.19s
+  [h1] subscription.subscribers      valid=True  MA=4/4   0.06s
+  [h1] subscription.subscriptions    valid=True  MA=6/6   0.54s
+  [h1] subscription.invoices         valid=True  MA=4/6   0.93s
+  [h1] subscription.usage_events     valid=True  MA=6/6   0.82s
+  [h1] support.agents           valid=True  MA=4/4   0.55s
+  [h1] support.accounts         valid=True  MA=4/4   0.05s
+  [h1] support.tickets          valid=True  MA=7/8   1.02s
+  [h1] support.messages         valid=True  MA=5/5   0.54s
+  [h1] support.sla_policies     valid=True  MA=4/4   0.12s
+  [h1] support.csat_surveys     valid=True  MA=4/5   0.34s
+strategy h2
+  [h2] ecommerce.customers        valid=True  MA=5/5   0.12s
+  [h2] ecommerce.products         valid=True  MA=5/5   0.09s
+  [h2] ecommerce.orders           valid=True  MA=6/6   0.48s
+  [h2] ecommerce.order_items      valid=True  MA=5/5   0.09s
+  [h2] ecommerce.payments         valid=True  MA=6/6   0.57s
+  [h2] ecommerce.carts            valid=True  MA=6/6   0.95s
+  [h2] healthcare.patients         valid=True  MA=5/5   0.07s
+  [h2] healthcare.providers        valid=True  MA=4/4   0.04s
+  [h2] healthcare.encounters       valid=True  MA=5/5   0.43s
+  [h2] healthcare.claims           valid=True  MA=6/6   0.73s
+  [h2] healthcare.claim_lines      valid=True  MA=5/5   0.05s
+  [h2] healthcare.prescriptions    valid=True  MA=6/6   0.54s
+  [h2] healthcare.lab_results      valid=True  MA=6/6   0.56s
+  [h2] hr_payroll.departments      valid=True  MA=3/3   0.06s
+  [h2] hr_payroll.employees        valid=True  MA=6/6   0.07s
+  [h2] hr_payroll.payroll_runs     valid=True  MA=5/5   0.96s
+  [h2] hr_payroll.payslips         valid=True  MA=7/8   1.29s
+  [h2] hr_payroll.leave_requests   valid=True  MA=5/5   0.45s
+  [h2] hr_payroll.timesheets       valid=True  MA=5/5   0.13s
+  [h2] logistics.warehouses       valid=True  MA=4/4   0.20s
+  [h2] logistics.shipments        valid=True  MA=6/6   0.91s
+  [h2] logistics.tracking_events  valid=True  MA=5/5   0.63s
+  [h2] logistics.vehicles         valid=True  MA=4/4   0.13s
+  [h2] logistics.drivers          valid=True  MA=4/4   0.13s
+  [h2] logistics.routes           valid=True  MA=6/6   0.43s
+  [h2] subscription.plans            valid=True  MA=4/4   0.12s
+  [h2] subscription.subscribers      valid=True  MA=4/4   0.09s
+  [h2] subscription.subscriptions    valid=True  MA=6/6   1.79s
+  [h2] subscription.invoices         valid=True  MA=6/6   0.76s
+  [h2] subscription.usage_events     valid=True  MA=6/6   1.07s
+  [h2] support.agents           valid=True  MA=4/4   0.11s
+  [h2] support.accounts         valid=True  MA=4/4   0.20s
+  [h2] support.tickets          valid=True  MA=7/8   1.96s
+  [h2] support.messages         valid=True  MA=5/5   0.66s
+  [h2] support.sla_policies     valid=True  MA=4/4   0.22s
+  [h2] support.csat_surveys     valid=True  MA=5/5   0.06s
+strategy s1
+  [s1] ecommerce.customers        valid=True  MA=4/5   0.35s
+  [s1] ecommerce.products         valid=True  MA=4/5  95.10s
+  [s1] ecommerce.orders           valid=False MA=4/6   0.21s
+  [s1] ecommerce.order_items      valid=True  MA=2/5  90.30s
+  [s1] ecommerce.payments         valid=True  MA=4/6  117.60s
+  [s1] ecommerce.carts            valid=True  MA=4/6  116.28s
+  [s1] healthcare.patients         valid=True  MA=4/5  100.46s
+  [s1] healthcare.providers        valid=True  MA=3/4  127.61s
+  [s1] healthcare.encounters       valid=True  MA=3/5  107.79s
+  [s1] healthcare.claims           valid=False MA=4/6  117.07s
+  [s1] healthcare.claim_lines      valid=True  MA=2/5  95.61s
+  [s1] healthcare.prescriptions    valid=True  MA=5/6  104.01s
+  [s1] healthcare.lab_results      valid=False MA=4/6  167.12s
+  [s1] hr_payroll.departments      valid=True  MA=2/3  91.23s
+  [s1] hr_payroll.employees        valid=True  MA=5/6  185.79s
+  [s1] hr_payroll.payroll_runs     valid=True  MA=3/5  116.93s
+  [s1] hr_payroll.payslips         valid=False MA=5/8  239.93s
+  [s1] hr_payroll.leave_requests   valid=True  MA=4/5  102.24s
+  [s1] hr_payroll.timesheets       valid=True  MA=4/5  102.47s
+  [s1] logistics.warehouses       valid=True  MA=3/4  87.76s
+  [s1] logistics.shipments        valid=False MA=2/6  123.99s
+  [s1] logistics.tracking_events  valid=True  MA=1/5  168.58s
+  [s1] logistics.vehicles         valid=True  MA=3/4  113.29s
+  [s1] logistics.drivers          valid=True  MA=3/4  105.07s
+  [s1] logistics.routes           valid=True  MA=4/6  163.48s
+  [s1] subscription.plans            valid=True  MA=3/4  202.55s
+  [s1] subscription.subscribers      valid=True  MA=2/4  174.90s
+  [s1] subscription.subscriptions    valid=True  MA=5/6  183.57s
+  [s1] subscription.invoices         valid=True  MA=4/6  311.09s
+  [s1] subscription.usage_events     valid=True  MA=5/6  258.62s
+  [s1] support.agents           valid=True  MA=3/4  115.49s
+  [s1] support.accounts         valid=True  MA=3/4  116.52s
+  [s1] support.tickets          valid=False MA=5/8  344.96s
+  [s1] support.messages         valid=True  MA=4/5  123.90s
+  [s1] support.sla_policies     valid=True  MA=2/4  116.63s
+  [s1] support.csat_surveys     valid=True  MA=3/5  140.30s
+strategy s1+verify
+  [s1+verify] ecommerce.customers        valid=True  MA=4/5   0.33s
+  [s1+verify] ecommerce.products         valid=True  MA=4/5   0.07s
+  [s1+verify] ecommerce.orders           valid=True  MA=4/6  221.19s
+  [s1+verify] ecommerce.order_items      valid=True  MA=2/5   0.08s
+  [s1+verify] ecommerce.payments         valid=True  MA=4/6   1.03s
+  [s1+verify] ecommerce.carts            valid=True  MA=4/6   0.87s
+  [s1+verify] healthcare.patients         valid=True  MA=4/5   0.10s
+  [s1+verify] healthcare.providers        valid=True  MA=3/4   0.10s
+  [s1+verify] healthcare.encounters       valid=True  MA=3/5  195.70s
+  [s1+verify] healthcare.claims           valid=False MA=4/6  178.71s
+  [s1+verify] healthcare.claim_lines      valid=True  MA=2/5   0.09s
+  [s1+verify] healthcare.prescriptions    valid=True  MA=5/6   0.41s
+  [s1+verify] healthcare.lab_results      valid=False MA=4/6  249.99s
+  [s1+verify] hr_payroll.departments      valid=True  MA=2/3   0.49s
+  [s1+verify] hr_payroll.employees        valid=True  MA=5/6   0.21s
+  [s1+verify] hr_payroll.payroll_runs     valid=True  MA=3/5   0.83s
+  [s1+verify] hr_payroll.payslips         valid=False MA=5/8  309.71s
+  [s1+verify] hr_payroll.leave_requests   valid=True  MA=4/5   0.18s
+  [s1+verify] hr_payroll.timesheets       valid=True  MA=4/5   0.24s
+  [s1+verify] logistics.warehouses       valid=True  MA=3/4   0.08s
+  [s1+verify] logistics.shipments        valid=False MA=2/6  180.13s
+  [s1+verify] logistics.tracking_events  valid=True  MA=3/5  214.53s
+  [s1+verify] logistics.vehicles         valid=True  MA=3/4   0.07s
+  [s1+verify] logistics.drivers          valid=True  MA=3/4   0.05s
+  [s1+verify] logistics.routes           valid=True  MA=4/6   0.37s
+  [s1+verify] subscription.plans            valid=True  MA=3/4   0.04s
+  [s1+verify] subscription.subscribers      valid=True  MA=2/4   0.05s
+  [s1+verify] subscription.subscriptions    valid=True  MA=5/6   0.45s
+  [s1+verify] subscription.invoices         valid=True  MA=4/6   0.44s
+  [s1+verify] subscription.usage_events     valid=True  MA=5/6   0.39s
+  [s1+verify] support.agents           valid=True  MA=3/4   0.07s
+  [s1+verify] support.accounts         valid=True  MA=3/4   0.04s
+  [s1+verify] support.tickets          valid=False MA=5/8  311.58s
+  [s1+verify] support.messages         valid=True  MA=4/5   0.73s
+  [s1+verify] support.sla_policies     valid=True  MA=2/4   0.11s
+  [s1+verify] support.csat_surveys     valid=True  MA=3/5  157.69s
+strategy s3
+  [s3] ecommerce.customers        valid=True  MA=5/5   0.37s
+  [s3] ecommerce.products         valid=True  MA=5/5  270.29s
+  [s3] ecommerce.orders           valid=True  MA=6/6   0.78s
+  [s3] ecommerce.order_items      valid=True  MA=5/5  197.22s
+  [s3] ecommerce.payments         valid=True  MA=6/6  266.95s
+  [s3] ecommerce.carts            valid=True  MA=6/6  365.73s
+  [s3] healthcare.patients         valid=True  MA=5/5  236.51s
+  [s3] healthcare.providers        valid=True  MA=4/4  174.39s
+  [s3] healthcare.encounters       valid=True  MA=5/5  239.29s
+  [s3] healthcare.claims           valid=True  MA=6/6  265.24s
+  [s3] healthcare.claim_lines      valid=True  MA=5/5  277.94s
+  [s3] healthcare.prescriptions    valid=True  MA=6/6  281.50s
+  [s3] healthcare.lab_results      valid=True  MA=6/6  254.73s
+  [s3] hr_payroll.departments      valid=True  MA=3/3  116.83s
+  [s3] hr_payroll.employees        valid=True  MA=6/6  250.49s
+  [s3] hr_payroll.payroll_runs     valid=True  MA=5/5  266.44s
+  [s3] hr_payroll.payslips         valid=True  MA=8/8  399.17s
+  [s3] hr_payroll.leave_requests   valid=True  MA=5/5  206.63s
+  [s3] hr_payroll.timesheets       valid=True  MA=5/5  218.84s
+  [s3] logistics.warehouses       valid=True  MA=4/4  136.98s
+  [s3] logistics.shipments        valid=False MA=5/6  480.35s
+  [s3] logistics.tracking_events  valid=True  MA=5/5  230.86s
+  [s3] logistics.vehicles         valid=True  MA=4/4  259.12s
+  [s3] logistics.drivers          valid=True  MA=4/4  241.74s
+  [s3] logistics.routes           valid=True  MA=6/6  276.58s
+  [s3] subscription.plans            valid=True  MA=4/4  210.87s
+  [s3] subscription.subscribers      valid=True  MA=4/4  142.41s
+  [s3] subscription.subscriptions    valid=True  MA=6/6  240.83s
+  [s3] subscription.invoices         valid=True  MA=6/6  296.89s
+  [s3] subscription.usage_events     valid=True  MA=6/6  217.68s
+  [s3] support.agents           valid=True  MA=4/4  120.80s
+  [s3] support.accounts         valid=True  MA=4/4  136.58s
+  [s3] support.tickets          valid=True  MA=8/8  421.85s
+  [s3] support.messages         valid=True  MA=5/5  168.96s
+  [s3] support.sla_policies     valid=True  MA=4/4  169.75s
+  [s3] support.csat_surveys     valid=True  MA=5/5  169.15s
+strategy s3-noverify
+  [s3-noverify] ecommerce.customers        valid=True  MA=5/5   0.40s
+  [s3-noverify] ecommerce.products         valid=True  MA=5/5   0.13s
+  [s3-noverify] ecommerce.orders           valid=True  MA=6/6   0.64s
+  [s3-noverify] ecommerce.order_items      valid=True  MA=5/5   0.40s
+  [s3-noverify] ecommerce.payments         valid=True  MA=6/6   0.61s
+  [s3-noverify] ecommerce.carts            valid=True  MA=6/6   0.59s
+  [s3-noverify] healthcare.patients         valid=True  MA=5/5   0.08s
+  [s3-noverify] healthcare.providers        valid=True  MA=4/4   0.10s
+  [s3-noverify] healthcare.encounters       valid=True  MA=5/5   0.44s
+  [s3-noverify] healthcare.claims           valid=True  MA=6/6   0.55s
+  [s3-noverify] healthcare.claim_lines      valid=True  MA=5/5   0.14s
+  [s3-noverify] healthcare.prescriptions    valid=True  MA=6/6   0.43s
+  [s3-noverify] healthcare.lab_results      valid=True  MA=6/6   0.53s
+  [s3-noverify] hr_payroll.departments      valid=True  MA=3/3   0.06s
+  [s3-noverify] hr_payroll.employees        valid=True  MA=6/6   0.14s
+  [s3-noverify] hr_payroll.payroll_runs     valid=True  MA=5/5   0.78s
+  [s3-noverify] hr_payroll.payslips         valid=True  MA=8/8   0.09s
+  [s3-noverify] hr_payroll.leave_requests   valid=True  MA=5/5   0.09s
+  [s3-noverify] hr_payroll.timesheets       valid=True  MA=5/5   0.24s
+  [s3-noverify] logistics.warehouses       valid=True  MA=4/4   0.09s
+  [s3-noverify] logistics.shipments        valid=False MA=5/6   0.16s
+  [s3-noverify] logistics.tracking_events  valid=True  MA=5/5   0.50s
+  [s3-noverify] logistics.vehicles         valid=True  MA=4/4   0.39s
+  [s3-noverify] logistics.drivers          valid=True  MA=4/4   0.07s
+  [s3-noverify] logistics.routes           valid=True  MA=6/6   0.38s
+  [s3-noverify] subscription.plans            valid=True  MA=4/4   0.09s
+  [s3-noverify] subscription.subscribers      valid=True  MA=4/4   0.24s
+  [s3-noverify] subscription.subscriptions    valid=True  MA=6/6   0.44s
+  [s3-noverify] subscription.invoices         valid=True  MA=6/6   0.47s
+  [s3-noverify] subscription.usage_events     valid=True  MA=6/6   0.56s
+  [s3-noverify] support.agents           valid=True  MA=4/4   0.28s
+  [s3-noverify] support.accounts         valid=True  MA=4/4   0.22s
+  [s3-noverify] support.tickets          valid=True  MA=8/8   0.73s
+  [s3-noverify] support.messages         valid=True  MA=5/5   0.43s
+  [s3-noverify] support.sla_policies     valid=True  MA=4/4   0.21s
+  [s3-noverify] support.csat_surveys     valid=True  MA=5/5   0.11s
+# Evaluation results
+
+Corpus: 6 schemas, 36 tables (Easy: 9, Medium: 11, Hard: 10, Extra Hard: 6), 300 rows/table, 158 reconciliation runs per strategy (clean + injected)
+
+Backend: source: SQLite; target: local filesystem
+
+## Overall
+
+| Strategy | MVR | MA P | MA R | MA F1 | RF P | RF R | RF F1 | Mean halluc. | CMS | s/table |
+|---|---|---|---|---|---|---|---|---|---|---|
+| H1 Declared-type rules (no LLM) | 1.00 | 0.91 | 0.91 | 0.91 | 1.00 | 0.96 | 0.98 | 0.06 | 0.96 | 0.39 |
+| H2 Sample+precedent rules + verification (no LLM) | 1.00 | 0.99 | 0.99 | 0.99 | 1.00 | 1.00 | 1.00 | 0.00 | 1.00 | 0.48 |
+| S1 Zero-shot prompting | 0.83 | 0.67 | 0.67 | 0.67 | 1.00 | 0.72 | 0.84 | 0.31 | 0.77 | 136.91 |
+| S1 + execution verification | 0.86 | 0.68 | 0.68 | 0.68 | 1.00 | 0.72 | 0.84 | 0.31 | 0.78 | 56.31 |
+| S3 Schema+sample-aware RAG + verification | 0.97 | 0.99 | 0.99 | 0.99 | 0.89 | 0.86 | 0.88 | 0.01 | 0.95 | 228.08 |
+| S3 RAG, no verification | 0.97 | 0.99 | 0.99 | 0.99 | 0.89 | 0.86 | 0.88 | 0.01 | 0.95 | 0.33 |
+
+## Mapping accuracy (F1) by tier
+
+| Strategy | Easy | Medium | Hard | Extra Hard |
+|---|---|---|---|---|
+| H1 Declared-type rules (no LLM) | 1.00 | 0.96 | 0.88 | 0.81 |
+| H2 Sample+precedent rules + verification (no LLM) | 1.00 | 1.00 | 0.98 | 0.97 |
+| S1 Zero-shot prompting | 0.69 | 0.69 | 0.67 | 0.62 |
+| S1 + execution verification | 0.69 | 0.69 | 0.67 | 0.68 |
+| S3 Schema+sample-aware RAG + verification | 1.00 | 1.00 | 0.98 | 1.00 |
+| S3 RAG, no verification | 1.00 | 1.00 | 0.98 | 1.00 |
+
+## Hallucination rate by category (fraction of tables)
+
+| Category | h1 | h2 | s1 | s1+verify | s3 | s3-noverify |
+|---|---|---|---|---|---|---|
+| Mapping Contradiction (schema) | 0.31 | 0.00 | 0.11 | 0.11 | 0.00 | 0.00 |
+| Type Overanalysis (schema) | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 |
+| Null-Convention Misrepresentation (schema) | 0.00 | 0.00 | 1.00 | 1.00 | 0.03 | 0.03 |
+| Redundant Transformation (logic) | 0.00 | 0.00 | 0.08 | 0.08 | 0.00 | 0.00 |
+| Trivial-Rule Abuse (logic) | 0.00 | 0.00 | 0.36 | 0.36 | 0.03 | 0.03 |
+| Reconciliation Math Delusion (logic) | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 |
+
+## Reconciliation recall by injected discrepancy
+
+| Discrepancy | runs | h1 | h2 | s1 | s1+verify | s3 | s3-noverify |
+|---|---|---|---|---|---|---|---|
+| truncated_decimal | 18 | 0.83 | 1.00 | 0.00 | 0.00 | 0.67 | 0.67 |
+| dropped_null_row | 10 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| duplicated_row | 36 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| timezone_shift | 16 | 0.88 | 1.00 | 0.00 | 0.00 | 0.31 | 0.31 |
+| off_by_one_partition | 36 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| flattened_json | 6 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| false-positive clean runs | 36 | 0 | 0 | 0 | 0 | 13 | 13 |
+
+## Rule-set study (gold mappings, injected discrepancies)
+
+| Discrepancy | Generic (row count + schema) | Deterministic (+ PK, partition counts) | Schema-aware (typed rules from mapping) |
+|---|---|---|---|
+| truncated_decimal | 0.00 | 0.00 | 1.00 |
+| dropped_null_row | 1.00 | 1.00 | 1.00 |
+| duplicated_row | 1.00 | 1.00 | 1.00 |
+| timezone_shift | 0.00 | 0.00 | 1.00 |
+| off_by_one_partition | 0.64 | 1.00 | 1.00 |
+| flattened_json | 1.00 | 1.00 | 1.00 |
+| overall recall | 0.61 | 0.72 | 1.00 |
+| false positives (clean runs) | 0/36 | 0/36 | 0/36 |
+| detections localised to a column | 0.00 | 0.93 | 1.00 |
+

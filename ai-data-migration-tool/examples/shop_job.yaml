@@ -1,0 +1,25 @@
+# Example job file: python -m amt run examples/shop_job.yaml
+# Every setting is explained in DATA_ENGINEERS.md.
+name: shop-nightly
+source: sqlite:///big.db                 # any source: postgresql://, mysql://, mssql://, Azure SQL, SQLite
+target: lake                             # a folder, or s3://bucket/path, abfss://container@account.dfs.core.windows.net/path, gs://bucket/path
+format: parquet                          # parquet | csv | delta | iceberg
+strategy: h2                             # h2 = rules (default), s3 = AI mapping (needs Ollama)
+rows_per_file: 100000
+chunk_rows: 50000                        # rows held in memory at a time
+crosscheck: true                         # let the database recompute counts and sums too
+# catalog:                               # format: iceberg
+#   type: sql                            # sql (local file), glue, rest, hive: see the pyiceberg docs
+#   uri: sqlite:///iceberg_catalog.db
+#   warehouse: C:/lake/warehouse
+#   namespace: shop
+# storage_options:                       # format: delta on cloud storage (values from environment variables)
+#   AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+#   AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+tables:
+  - name: customers
+    mask: [email]                        # personal data masked in the copy
+  - name: orders
+    partition_by: updated_at             # monthly folders / partitions
+    incremental: {column: updated_at, mode: append}   # mode: upsert needs format: delta
+    # overrides: {is_gift: {target_type: bool, transform: int_to_bool}}

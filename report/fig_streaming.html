@@ -1,0 +1,59 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;background:#fff}
+svg{display:block;font-family:"Times New Roman",Times,serif}
+.b{fill:#fff;stroke:#000;stroke-width:1.4}
+.g{fill:#efefef;stroke:#000;stroke-width:1.4}
+.t{font-size:16px;font-weight:bold;text-anchor:middle}
+.s{font-size:13px;text-anchor:middle}
+.l{font-size:13px;font-style:italic;text-anchor:middle}
+.a{stroke:#000;stroke-width:1.4;fill:none;marker-end:url(#ar)}
+.d{stroke:#000;stroke-width:1.2;fill:none;stroke-dasharray:5 4;marker-end:url(#ar)}
+</style></head><body>
+<svg width="760" height="365" viewBox="0 0 760 365" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z"/></marker></defs>
+
+<rect class="g" x="20" y="20" width="160" height="72" rx="4"/>
+<text class="t" x="100" y="48">Source database</text>
+<text class="s" x="100" y="70">rows read in chunks</text>
+
+<rect class="b" x="225" y="20" width="170" height="72" rx="4"/>
+<text class="t" x="310" y="48">Convert and mask</text>
+<text class="s" x="310" y="70">single pass</text>
+<line class="a" x1="180" y1="56" x2="223" y2="56"/>
+
+<rect class="b" x="440" y="20" width="150" height="72" rx="4"/>
+<text class="t" x="515" y="48">Writer</text>
+<text class="s" x="515" y="70">files · Delta · Iceberg</text>
+<line class="a" x1="395" y1="56" x2="438" y2="56"/>
+
+<rect class="g" x="620" y="20" width="120" height="72" rx="4"/>
+<text class="t" x="680" y="48">Output</text>
+<text class="s" x="680" y="70">storage</text>
+<line class="a" x1="590" y1="56" x2="618" y2="56"/>
+
+<rect class="g" x="20" y="140" width="160" height="72" rx="4"/>
+<text class="t" x="100" y="164">SQL aggregates</text>
+<text class="s" x="100" y="184">COUNT · SUM</text>
+<text class="s" x="100" y="201">MIN · MAX</text>
+<line class="a" x1="100" y1="92" x2="100" y2="138"/>
+<text class="l" x="108" y="120" style="text-anchor:start">database</text>
+
+<rect class="b" x="225" y="140" width="170" height="72" rx="4"/>
+<text class="t" x="310" y="166">Source summary</text>
+<text class="s" x="310" y="188">counts · sums · hashes</text>
+<line class="a" x1="310" y1="92" x2="310" y2="138"/>
+
+<rect class="b" x="560" y="140" width="180" height="72" rx="4"/>
+<text class="t" x="650" y="166">Target summary</text>
+<text class="s" x="650" y="188">counts · sums · hashes</text>
+<line class="a" x1="680" y1="92" x2="680" y2="138"/>
+<text class="l" x="688" y="120" style="text-anchor:start">read back</text>
+
+<rect class="b" x="225" y="255" width="515" height="72" rx="4"/>
+<text class="t" x="482" y="282">Compare</text>
+<text class="s" x="482" y="304">schema-aware checks · per-partition verdicts · database cross-check</text>
+<line class="a" x1="310" y1="212" x2="310" y2="253"/>
+<line class="a" x1="650" y1="212" x2="650" y2="253"/>
+<path class="a" d="M100,212 V291 H223"/>
+<text class="l" x="482" y="352">memory holds one chunk plus small summaries, never the whole table</text>
+</svg></body></html>

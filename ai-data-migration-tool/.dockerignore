@@ -1,0 +1,10 @@
+**/__pycache__
+**/*.pyc
+results/work
+results/llm_cache
+results_*/
+demo_out
+reports
+.llm_cache
+tests
+tools

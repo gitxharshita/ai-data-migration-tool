@@ -1,0 +1,16 @@
+pyarrow>=14
+# job files (python -m amt run job.yaml)
+pyyaml
+# optional: Delta Lake and Apache Iceberg output
+# deltalake
+# pyiceberg[sql-sqlite,pyarrow]
+# optional: AI strategies S1/S3 and the AI assistant
+# anthropic          (paid API; the free alternative is Ollama, no Python package needed)
+# optional connectors
+# psycopg2-binary
+# pyodbc
+# pymysql
+# boto3
+# google-cloud-storage
+# azure-storage-blob
+# azure-identity

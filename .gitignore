@@ -1,0 +1,25 @@
+# Not part of this repository
+paper/
+.claude/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Temporary and generated output (recreated by running the tool)
+ai-data-migration-tool/demo_out/
+ai-data-migration-tool/reports/
+ai-data-migration-tool/results_llm_test/
+ai-data-migration-tool/results*/work/
+ai-data-migration-tool/.llm_cache/
+ai-data-migration-tool/results_minio_log.txt
+ai-data-migration-tool/**/.amt_state/
+*.db
+*.tmp
+
+# Office lock files and OS clutter
+~$*
+Thumbs.db
+desktop.ini

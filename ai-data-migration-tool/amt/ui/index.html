@@ -1,0 +1,976 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Data Migration Tool</title>
+<style>
+:root{
+  --bg:#f6f7f9; --panel:#ffffff; --ink:#18202b; --muted:#5d6878; --line:#e2e6ec;
+  --accent:#2f5bd3; --accent-soft:#e8eefc; --ok:#1b8a4b; --ok-soft:#e5f5ec;
+  --bad:#c23a32; --bad-soft:#fbe9e7; --warn:#a86a00; --warn-soft:#fdf3dc; --code:#f1f3f6;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11151b; --panel:#1a1f27; --ink:#e6e9ee; --muted:#9aa4b2; --line:#2b323d;
+    --accent:#7ea1ff; --accent-soft:#1f2a44; --ok:#4cc483; --ok-soft:#15301f;
+    --bad:#ff7b72; --bad-soft:#3a1d1b; --warn:#e3b341; --warn-soft:#3a2f12; --code:#232a34;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11151b; --panel:#1a1f27; --ink:#e6e9ee; --muted:#9aa4b2; --line:#2b323d;
+  --accent:#7ea1ff; --accent-soft:#1f2a44; --ok:#4cc483; --ok-soft:#15301f;
+  --bad:#ff7b72; --bad-soft:#3a1d1b; --warn:#e3b341; --warn-soft:#3a2f12; --code:#232a34;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+header{background:var(--panel);border-bottom:1px solid var(--line);padding:18px 28px 0}
+header h1{margin:0;font-size:22px}
+header p{margin:4px 0 14px;color:var(--muted)}
+nav{display:flex;gap:4px;flex-wrap:wrap}
+nav button{border:0;background:none;color:var(--muted);padding:10px 14px;font:inherit;font-weight:600;cursor:pointer;border-bottom:3px solid transparent}
+nav button.active{color:var(--accent);border-color:var(--accent)}
+main{max-width:1180px;margin:0 auto;padding:24px 20px 60px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px 22px;margin-bottom:18px}
+.card h2{margin:0 0 4px;font-size:18px;display:flex;align-items:center;gap:10px}
+.step{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;font-size:14px;flex:none}
+.card.locked{opacity:.5;pointer-events:none}
+.hint{color:var(--muted);margin:2px 0 14px}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:end}
+label{font-size:13px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px}
+select,input[type=text]{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--ink);min-width:200px}
+button.primary{font:inherit;font-weight:600;background:var(--accent);color:#fff;border:0;border-radius:7px;padding:9px 18px;cursor:pointer}
+button.primary:disabled{opacity:.5;cursor:wait}
+button.ghost{font:inherit;background:none;border:1px solid var(--line);color:var(--ink);border-radius:7px;padding:8px 14px;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.chip{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:8px 12px;cursor:pointer;text-align:left;font:inherit;color:var(--ink)}
+.chip small{display:block;color:var(--muted);font-size:12px}
+.chip.sel{border-color:var(--accent);background:var(--accent-soft)}
+.badge{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--code);color:var(--muted);white-space:nowrap}
+.badge.ok{background:var(--ok-soft);color:var(--ok)} .badge.bad{background:var(--bad-soft);color:var(--bad)}
+.badge.warn{background:var(--warn-soft);color:var(--warn)} .badge.acc{background:var(--accent-soft);color:var(--accent)}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:var(--code);font-weight:600;color:var(--muted);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+code,.mono{font-family:Consolas,"Cascadia Mono",monospace;font-size:12.5px}
+.null{color:var(--muted);font-style:italic}
+.strats{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin-bottom:14px}
+.strat{border:1px solid var(--line);border-radius:8px;padding:10px 12px;cursor:pointer;background:var(--panel)}
+.strat.sel{border-color:var(--accent);background:var(--accent-soft)}
+.strat.off{opacity:.45;cursor:not-allowed}
+.strat b{display:flex;align-items:center;gap:8px;flex-wrap:wrap} .strat span{font-size:13px;color:var(--muted)}
+.strat .radio{width:14px;height:14px;border-radius:50%;border:2px solid var(--line);flex:none}
+.strat.sel .radio{border-color:var(--accent);background:radial-gradient(var(--accent) 45%,transparent 50%)}
+.strat:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.linkbtn{background:none;border:0;padding:0;margin:0 0 12px;color:var(--accent);font:inherit;font-size:13px;cursor:pointer;text-decoration:underline}
+.strat .badge{white-space:normal}
+.banner{border-radius:8px;padding:14px 16px;margin:12px 0;font-weight:600;display:flex;gap:12px;align-items:center}
+.banner.ok{background:var(--ok-soft);color:var(--ok)} .banner.bad{background:var(--bad-soft);color:var(--bad)}
+.banner.warn{background:var(--warn-soft);color:var(--warn)}
+.banner .big{font-size:26px}
+.banner p{margin:2px 0 0;font-weight:400;color:var(--ink)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+.stat{border:1px solid var(--line);border-radius:8px;padding:10px 14px}
+.stat b{font-size:22px;display:block} .stat span{color:var(--muted);font-size:13px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:800px){.two{grid-template-columns:1fr} header{padding:14px 16px 0} main{padding:16px 12px}}
+.changed td{background:var(--warn-soft)}
+.arrow{color:var(--muted)}
+.log{font-family:Consolas,monospace;font-size:12.5px;background:var(--code);border-radius:8px;padding:10px 12px;white-space:pre-wrap;margin:8px 0}
+.bar{height:20px;border-radius:4px;background:var(--accent);min-width:2px}
+.barrow{display:grid;grid-template-columns:180px 1fr 48px;gap:10px;align-items:center;margin:5px 0;font-size:13.5px}
+.bartrack{background:var(--code);border-radius:4px}
+.legend{display:flex;gap:16px;font-size:13px;color:var(--muted);margin:6px 0 10px}
+.sw{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+details summary{cursor:pointer;color:var(--accent);font-weight:600;margin:8px 0}
+.err{background:var(--bad-soft);color:var(--bad);border-radius:8px;padding:10px 14px;margin:10px 0;white-space:pre-wrap}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:s .7s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes s{to{transform:rotate(360deg)}}
+.flow{display:flex;gap:8px;flex-wrap:wrap;align-items:stretch;margin:10px 0}
+.flow div{flex:1;min-width:150px;border:1px solid var(--line);border-radius:8px;padding:12px;background:var(--panel)}
+.flow b{display:block;margin-bottom:4px}
+.flow span{font-size:13px;color:var(--muted)}
+.hidden{display:none !important}
+.progress{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:12px 0 4px}
+.pstep{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);padding:5px 10px;border-radius:20px;background:var(--code)}
+.pstep .dot{width:9px;height:9px;border-radius:50%;background:var(--line)}
+.pstep.done{color:var(--ok);background:var(--ok-soft)} .pstep.done .dot{background:var(--ok)}
+.pstep.now{color:var(--accent);background:var(--accent-soft);font-weight:600} .pstep.now .dot{background:var(--accent);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.3}}
+.pmeta{font-size:13px;color:var(--muted);margin:2px 0 8px}
+.guide{display:flex;gap:14px;align-items:flex-start;background:var(--accent-soft);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:18px}
+.guide ol{margin:4px 0 0;padding-left:20px} .guide li{margin:2px 0}
+.guide button{margin-left:auto;flex:none}
+a.dl{display:inline-block;font-weight:600;background:var(--accent);color:#fff;border-radius:7px;padding:8px 14px;text-decoration:none;margin:10px 8px 0 0}
+.pubnote{font-size:13px;color:var(--muted);margin:6px 0 0}
+input[type=text]{max-width:100%}
+input[type=password]{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--ink)}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px 14px;margin-top:12px;max-width:760px}
+.fgrid label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fgrid select,.fgrid input{width:100%;min-width:0}
+.fgrid .span-all{grid-column:1/-1}
+.actions{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:16px}
+.actions .linkbtn{margin:0}
+#dbHint{margin:10px 0 0;max-width:760px}
+details.adv{margin:0 0 14px}
+details.adv summary{font-weight:600;font-size:13.5px}
+details.adv .row{margin-top:8px}
+.nextrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.tsum{color:var(--muted);margin:8px 0 4px}
+.verdict{border-radius:10px;padding:14px 16px;margin:12px 0;background:var(--accent-soft);border:1px solid var(--line)}
+.verdict b{display:block;font-size:16px;margin-bottom:2px}
+.findings{margin:6px 0 0;padding-left:20px} .findings li{margin:6px 0}
+.card h3{font-size:15.5px}
+.methodnote{grid-column:1/-1;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:14px;background:var(--panel)}
+.assist{border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:14px 0;background:var(--panel)}
+.assist h3{margin:0 0 4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.assist .hint{margin:2px 0 8px}
+.flag{border:1px solid var(--line);border-left:4px solid var(--warn);border-radius:8px;padding:10px 12px;margin:8px 0}
+.flag.accepted{border-left-color:var(--ok);background:var(--ok-soft)}
+.flag.kept{opacity:.7}
+.flag .btns{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.flag .chg{font-size:13.5px;margin:4px 0}
+.pii{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}
+.pii span{border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:13px;background:var(--warn-soft)}
+.pii small{display:block;color:var(--muted);font-size:12px}
+.aibox{border-radius:10px;padding:12px 14px;margin:12px 0;background:var(--accent-soft);border:1px solid var(--line)}
+.aibox p{margin:4px 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>AI Data Migration Tool</h1>
+  <p>Move database tables into cloud-ready Parquet/CSV files, and prove that nothing was lost or changed.</p>
+  <nav>
+    <button data-tab="migrate" class="active">Migrate a table</button>
+    <button data-tab="break">Test the checks</button>
+    <button data-tab="results">Experiment results</button>
+    <button data-tab="how">How it works</button>
+  </nav>
+</header>
+<main>
+
+<!-- ============================ MIGRATE ============================ -->
+<section id="tab-migrate">
+  <div class="guide hidden" id="guide">
+    <div><b>New here? Three steps, about one minute:</b>
+      <ol>
+        <li><b>Choose a database</b>: your own, or a sample one to try the tool, and pick a table.</li>
+        <li><b>Generate mapping</b>: see how every column will be converted, and whether the dry run found problems.</li>
+        <li><b>Run migration</b>: the data is copied, then checked value by value. Download the files and report at the end.</li>
+      </ol>
+      <span class="hint" style="margin:6px 0 0;display:block">Tip: the <b>Test the checks</b> tab damages a copy on purpose, so you can see the checks catch errors that ordinary row counts miss.</span>
+    </div>
+    <button class="ghost" id="guideClose">Got it</button>
+  </div>
+  <div class="card" id="c1">
+    <h2><span class="step">1</span> Choose a source database</h2>
+    <p class="hint">Connect your own database (SQLite, PostgreSQL, MySQL / MariaDB, Microsoft SQL Server or Azure SQL Database), or try the tool first with one of the sample databases.</p>
+    <div class="fgrid">
+      <div><label for="srcSel">Database</label><select id="srcSel" autocomplete="off"></select></div>
+      <div id="typeBox" class="hidden"><label for="dbType">Database type</label><select id="dbType">
+        <option value="sqlite">SQLite (a .db file)</option>
+        <option value="postgresql">PostgreSQL</option>
+        <option value="mysql">MySQL / MariaDB</option>
+        <option value="mssql">Microsoft SQL Server</option>
+        <option value="azuresql">Azure SQL Database</option>
+      </select></div>
+    </div>
+    <div id="pathBox" class="hidden">
+      <div class="fgrid" id="dbFields"></div>
+      <div class="fgrid hidden" id="pasteBox"><div class="span-all"><label for="srcPath">Connection address</label>
+        <input type="text" id="srcPath" placeholder="postgresql://user:password@localhost:5432/mydb?schema=public"></div></div>
+      <p class="hint" id="dbHint"></p>
+    </div>
+    <div class="actions">
+      <button class="primary" id="btnConnect">Connect</button>
+      <button type="button" class="linkbtn hidden" id="pasteToggle"></button>
+    </div>
+    <div id="tables"></div>
+    <div id="tableDetail"></div>
+  </div>
+
+  <div class="card locked" id="c2">
+    <h2><span class="step">2</span> Plan the mapping</h2>
+    <p class="hint">The tool works out how each column should be stored (number, money, date, true/false, text) and tests the plan on a few sample rows before any data moves. <b>Just click Generate mapping.</b></p>
+    <div class="strats" id="strats"></div>
+    <button type="button" class="linkbtn" id="moreStrats"></button>
+    <div class="strats hidden" id="stratsMore"></div>
+    <div id="aiHelp"></div>
+    <details class="adv"><summary>Output options</summary>
+      <div class="row">
+        <div><label>File format</label><select id="fmt"><option value="parquet">Parquet (recommended, keeps exact types)</option><option value="csv">CSV (opens in Excel)</option></select></div>
+        <div><label>Split into monthly folders by</label><select id="part"></select></div>
+      </div>
+    </details>
+    <button class="primary" id="btnPlan">Generate mapping</button>
+    <div id="planOut"></div>
+  </div>
+
+  <div class="card locked" id="c3">
+    <h2><span class="step">3</span> Choose where to save, then migrate</h2>
+    <p class="hint">Copies every row into files at the destination, then reads the files back and compares them with the source database, check by check. <b>To try it out, keep "Local folder" and click Run migration.</b></p>
+    <label>Destination</label>
+    <div class="strats" id="dests"></div>
+    <div class="row" id="destRow">
+      <div style="flex:1;min-width:260px"><label id="destLabel">Location</label><input type="text" id="destUri" style="width:100%"></div>
+      <button class="ghost" id="btnTestDest">Test connection</button>
+    </div>
+    <p class="hint" id="destHelp" style="margin-top:8px"></p>
+    <div id="destTest"></div>
+    <button class="primary" id="btnMigrate" style="margin-top:6px">Run migration</button>
+    <div id="migOut"></div>
+  </div>
+</section>
+
+<!-- ============================ BREAK ============================ -->
+<section id="tab-break" class="hidden">
+  <div class="card">
+    <h2>Test the checks</h2>
+    <p class="hint"><b>How do you know a green "all checks passed" means anything?</b> Here you can watch the checks fail when they should. We migrate a sample table correctly, then deliberately damage the copy in one known way, the kind of silent error that happens in real projects, and see which checks notice.
+      Compare <b>generic checks</b> (row counts, which most ETL tools stop at) with this tool's <b>schema-aware checks</b>.</p>
+    <div class="row">
+      <div><label>Database</label><select id="bSrc"></select></div>
+      <div><label>Table</label><select id="bTable"></select></div>
+      <div><label>Fault to inject</label><select id="bFault"></select></div>
+      <button class="primary" id="btnBreak">Inject fault and check</button>
+    </div>
+    <p class="hint" id="bFaultText" style="margin-top:10px"></p>
+    <div id="breakOut"></div>
+  </div>
+</section>
+
+<!-- ============================ RESULTS ============================ -->
+<section id="tab-results" class="hidden"><div id="resOut"><div class="card">Loading...</div></div></section>
+
+<!-- ============================ HOW ============================ -->
+<section id="tab-how" class="hidden">
+  <div class="card">
+    <h2>The problem</h2>
+    <p>Companies regularly copy tables from operational databases (PostgreSQL, MySQL) into cloud storage (Amazon S3, Google Cloud Storage) as Parquet or CSV files. The copying is easy; doing it <b>without silently damaging data</b> is not:</p>
+    <ul>
+      <li>A money column <code>DECIMAL(18,2)</code> stored as a floating-point number can lose paise.</li>
+      <li>A timestamp with a time zone can quietly lose its time zone.</li>
+      <li>Empty values (NULL) can turn into empty strings.</li>
+      <li>A JSON column can be flattened and lose its nested data.</li>
+    </ul>
+    <p>Most tools only check that the <b>number of rows</b> matches, and every one of the errors above passes that check.</p>
+  </div>
+  <div class="card">
+    <h2>How the tool works</h2>
+    <div class="flow">
+      <div><b>1. Connector</b><span>Reads the table structure and 20 sample rows from the database.</span></div>
+      <div><b>2. Schema Mapper</b><span>Decides each column's output type. Can be rules or an AI model (LLM), helped by sample values and past migrations.</span></div>
+      <div><b>3. Dry run</b><span>Converts the sample rows first. If something would be lost, the plan is fixed before any real data moves.</span></div>
+      <div><b>4. Executor</b><span>Copies all rows into Parquet/CSV files, split into monthly folders.</span></div>
+      <div><b>5. Reconciliation</b><span>Reads the files back and runs checks made for this table's columns: exact totals, time zones, NULLs, JSON and more.</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Glossary</h2>
+    <div class="tablewrap"><table>
+      <tr><th>Term</th><th>Meaning</th></tr>
+      <tr><td>Schema</td><td>The structure of a database: its tables, columns and their types.</td></tr>
+      <tr><td>Schema mapping</td><td>The plan for what each source column becomes in the output file.</td></tr>
+      <tr><td>Parquet</td><td>A column-based file format used by data lakes; it keeps exact types.</td></tr>
+      <tr><td>Partition</td><td>Splitting output into folders, e.g. one folder per month.</td></tr>
+      <tr><td>Reconciliation</td><td>Proving the output matches the source, with evidence for each check.</td></tr>
+      <tr><td>LLM</td><td>Large language model, the AI that can propose mappings and checks.</td></tr>
+      <tr><td>RAG</td><td>Retrieval-augmented generation: giving the AI relevant examples (here, past migrations) along with the question.</td></tr>
+      <tr><td>Hallucination</td><td>When the AI confidently proposes something wrong, e.g. storing money as a float.</td></tr>
+    </table></div>
+  </div>
+</section>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = v => String(v).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const val = v => v === null || v === undefined ? '<span class="null">NULL</span>' :
+  esc(typeof v === 'object' ? JSON.stringify(v) : v).slice(0, 120);
+
+const TYPE_TEXT = t => {
+  const m = /^decimal\((\d+),(\d+)\)$/.exec(t);
+  if (m) return `exact decimal (${m[2]} digits after the point)`;
+  return {int64:'whole number', float64:'approximate number (float)', string:'text', bool:'true / false',
+          date:'date', timestamp:'date-time (no time zone)', timestamp_tz:'date-time in UTC',
+          json_string:'JSON document'}[t] || t;
+};
+const RULE_TEXT = {
+  row_count:['Row count matches','Same number of rows in source and output.'],
+  pk_unique:['No duplicate IDs','Every primary key appears exactly once.'],
+  partition_row_count:['Each monthly folder is correct','Every partition holds exactly the rows that belong to it.'],
+  schema_conformity:['Columns and types as planned','The written file has exactly the planned columns and types.'],
+  null_count:['Empty values stay empty','NULLs were not turned into blanks or zeros.'],
+  column_checksum:['Every value identical','A fingerprint of all values matches.'],
+  sum_exact:['Total matches exactly','The column total matches down to the last digit.'],
+  min_max:['Smallest and largest unchanged','The value range is preserved.'],
+  distinct_count:['Same distinct values','The set of different values is preserved.'],
+  true_ratio:['Same true/false split','The share of true values is preserved.'],
+  timestamp_exact:['Same moments in time','Every timestamp is the same instant (time zones handled).'],
+  json_roundtrip:['JSON unchanged','Every JSON document survives unchanged.'],
+};
+const TRANSFORM_TEXT = {none:'copy as is', tz_to_utc:'convert to UTC', parse_timestamp_tz:'read text as date-time',
+  int_to_bool:'0/1 to true/false', json_canonical:'keep as JSON', parse_date:'read as date', json_flatten:'flatten JSON'};
+
+let INFO = null, CONN = null, SEL = null, STRAT = 'h2', PLAN = null;
+
+async function api(path, body) {
+  let r;
+  try {
+    r = await fetch(path, body ? {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)} : {});
+  } catch (e) { throw new Error('Cannot reach the server. Check your connection and try again.'); }
+  let data = {};
+  try { data = await r.json(); } catch (e) { /* non-JSON error page */ }
+  if (!r.ok || (data.error && !data.log)) throw new Error(data.error || `The server answered ${r.status}.`);
+  return data;
+}
+// Screenshot mode (?shot, used to make the report's figures with a headless browser): headless
+// "virtual time" skips timers instantly, so wait with real requests to the server instead.
+const SHOT = location.search.includes('shot');
+const sleep = ms => {
+  if (!SHOT) return new Promise(res => setTimeout(res, ms));
+  for (let i = 0; i < Math.max(1, ms / 20); i++) {
+    const x = new XMLHttpRequest(); x.open('GET', '/api/health', false);
+    try { x.send(); } catch (e) { /* keep waiting */ }
+  }
+  return Promise.resolve();
+};
+const STAGES = {
+  plan: [['queued', 'Waiting in queue'], ['plan', 'Reading table and planning'], ['verify', 'Dry run on samples']],
+  migrate: [['queued', 'Waiting in queue'], ['plan', 'Planning and dry run'], ['migrate', 'Copying rows'], ['verify', 'Checking the output']],
+  break: [['queued', 'Waiting in queue'], ['plan', 'Planning'], ['migrate', 'Migrating correctly'], ['inject', 'Damaging on purpose'], ['verify', 'Running both sets of checks']],
+  review: [['queued', 'Waiting for the AI'], ['plan', 'Preparing'], ['review', 'AI reviewing']],
+  summary: [['queued', 'Waiting for the AI'], ['review', 'AI writing']],
+};
+function renderProgress(el, type, st) {
+  const stages = STAGES[type];
+  const idx = st.status === 'done' ? stages.length : st.status === 'queued' ? 0
+            : Math.max(1, stages.findIndex(s => s[0] === st.stage));
+  el.innerHTML = `<div class="progress">${stages.map((s, i) =>
+      `<div class="pstep ${i < idx ? 'done' : i === idx ? 'now' : ''}"><span class="dot"></span>${s[1]}</div>`).join('')}</div>
+    <div class="pmeta">${st.status === 'queued'
+        ? (st.position > 1 ? `${st.position - 1} ${st.position === 2 ? 'person is' : 'people are'} ahead of you in the queue. This usually takes a few seconds.` : 'Starting...')
+        : esc(st.detail || 'Working...')} &middot; ${st.elapsed}s</div>`;
+}
+async function runJob(type, body, el) {
+  const {job_id} = await api('/api/jobs', {type, ...body});
+  let failures = 0;
+  while (true) {
+    let st;
+    try { st = await api('/api/jobs/' + job_id); failures = 0; }
+    catch (e) { if (++failures > 5) throw e; await sleep(1500); continue; }
+    if (el) renderProgress(el, type, st);
+    if (st.status === 'done') { if (el) el.innerHTML = ''; return {...st.result, job_id}; }
+    if (st.status === 'error') { if (el) el.innerHTML = ''; throw new Error(st.error); }
+    await sleep(st.status === 'queued' ? 1000 : 400);
+  }
+}
+async function busy(btn, text, fn) {
+  const old = btn.innerHTML; btn.disabled = true; btn.innerHTML = `<span class="spin"></span>${text}`;
+  try { return await fn(); } finally { btn.disabled = false; btn.innerHTML = old; }
+}
+const errBox = (e, title = 'Something went wrong.') => `<div class="err"><b>${esc(title)}</b>\n${esc(e.message || e)}</div>`;
+
+// ---------- tabs ----------
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('nav button').forEach(x => x.classList.toggle('active', x === b));
+  document.querySelectorAll('main > section').forEach(s => s.classList.toggle('hidden', s.id !== 'tab-' + b.dataset.tab));
+  if (b.dataset.tab === 'results') loadResults();
+  if (b.dataset.tab === 'break') syncBreak();
+});
+
+// ---------- step 1 ----------
+// Your own database: one small form per database type; the page builds the connection address.
+const DB_TYPES = {
+  // [key, label, default value, kind, placeholder]
+  sqlite: {fields: [['file', 'File path', '', 'wide', 'C:\\data\\shop.db']],
+           hint: 'The full path of the SQLite .db file on this computer.'},
+  postgresql: {fields: [['host', 'Server', 'localhost'], ['port', 'Port', '5432'], ['db', 'Database name', '', '', 'e.g. salesdb'],
+                        ['schema', 'Schema', 'public'], ['user', 'User name', 'postgres'], ['pw', 'Password', '', 'password']],
+               hint: 'The schema is the group of tables inside the database, often "public".'},
+  mysql: {fields: [['host', 'Server', 'localhost'], ['port', 'Port', '3306'], ['db', 'Database name', '', '', 'e.g. salesdb'],
+                   ['user', 'User name', 'root'], ['pw', 'Password', '', 'password']],
+          hint: 'Works for both MySQL and MariaDB.'},
+  mssql: {fields: [['host', 'Server', 'localhost'], ['instance', 'Instance', 'SQLEXPRESS'], ['db', 'Database name', '', '', 'e.g. SalesDB'],
+                   ['schema', 'Schema', 'dbo'], ['user', 'User name', '', '', 'Windows login'], ['pw', 'Password', '', 'password', 'Windows login']],
+          hint: 'Leave the user name and password empty to sign in with your Windows account.'},
+  azuresql: {fields: [['host', 'Server', '', '', 'myserver.database.windows.net'], ['db', 'Database name', '', '', 'e.g. SalesDB'],
+                      ['schema', 'Schema', 'dbo'],
+                      ['auth', 'Sign-in method', 'sql', 'select', '', [
+                        ['sql', 'SQL login (user name + password)'],
+                        ['ActiveDirectoryInteractive', 'Microsoft Entra ID: sign in in the browser (MFA)'],
+                        ['ActiveDirectoryPassword', 'Microsoft Entra ID: user name + password'],
+                        ['ActiveDirectoryMsi', 'Managed identity (on an Azure VM)']]],
+                      ['user', 'User name', '', '', 'e.g. sqladmin'], ['pw', 'Password', '', 'password']],
+             hint: 'Find the server name on the database\'s Overview page in the Azure portal. The connection is always encrypted. If you get a firewall error, add your IP address under the server\'s Networking settings.'},
+};
+const AZ_HINT = {
+  sql: 'Use the SQL admin login created with the server, or another SQL user.',
+  ActiveDirectoryInteractive: 'Enter your work or school email; a Microsoft sign-in window opens (MFA supported). No password is typed here.',
+  ActiveDirectoryPassword: 'Your work or school email and its password. Does not work for accounts that require MFA.',
+  ActiveDirectoryMsi: 'Only when the dashboard itself runs on an Azure VM or App Service with a managed identity. Leave the user name empty (or enter a user-assigned identity\'s client ID).',
+};
+const DB_VALUES = {};   // what the user typed, kept when switching type
+function renderDbFields() {
+  const t = DB_TYPES[$('#dbType').value];
+  const type = $('#dbType').value, cur = k => DB_VALUES[type + ':' + k];
+  const auth = cur('auth') || 'sql';
+  $('#dbFields').innerHTML = t.fields.map(([k, label, def, kind, ph, opts]) => {
+    // Azure: the password box only applies to the two sign-in methods that use one.
+    if (type === 'azuresql' && k === 'pw' && !['sql', 'ActiveDirectoryPassword'].includes(auth)) return '';
+    if (type === 'azuresql' && k === 'user') {
+      label = auth === 'ActiveDirectoryMsi' ? 'Identity client ID' : auth === 'sql' ? 'User name' : 'Email';
+      ph = auth === 'ActiveDirectoryMsi' ? 'leave empty for the default identity' : auth === 'sql' ? 'e.g. sqladmin' : 'you@company.com';
+    }
+    const v = cur(k) ?? (kind === 'password' ? '' : def);
+    const control = kind === 'select'
+      ? `<select id="db_${k}" data-k="${k}">${opts.map(([ov, ol]) => `<option value="${esc(ov)}" ${ov === v ? 'selected' : ''}>${esc(ol)}</option>`).join('')}</select>`
+      : `<input type="${kind === 'password' ? 'password' : 'text'}" id="db_${k}" data-k="${k}" value="${esc(v)}" placeholder="${esc(ph || '')}" autocomplete="off">`;
+    return `<div class="${kind === 'wide' ? 'span-all' : ''}"><label for="db_${k}">${esc(label)}</label>${control}</div>`;
+  }).join('');
+  $('#dbHint').textContent = type === 'azuresql' ? `${AZ_HINT[auth]} ${t.hint}` : t.hint;
+  document.querySelectorAll('#dbFields input').forEach(i => i.oninput = () => { DB_VALUES[type + ':' + i.dataset.k] = i.value; });
+  document.querySelectorAll('#dbFields select').forEach(s => s.onchange = () => { DB_VALUES[type + ':' + s.dataset.k] = s.value; renderDbFields(); });
+}
+function buildDbUri() {
+  const type = $('#dbType').value, f = k => ($('#db_' + k)?.value || '').trim(), enc = encodeURIComponent;
+  const need = (k, label) => { if (!f(k)) throw new Error(`Please fill in "${label}".`); };
+  if (type === 'sqlite') { need('file', 'File path'); return f('file'); }
+  need('host', 'Server'); need('db', 'Database name');
+  const pwv = $('#db_pw') ? $('#db_pw').value : '';
+  const cred = f('user') ? `${enc(f('user'))}${pwv ? ':' + enc(pwv) : ''}@` : '';
+  if (type === 'azuresql') {
+    const auth = $('#db_auth').value, host = f('host').replace(/^tcp:/i, '').replace(/,\d+$/, '');
+    if (auth === 'sql') { need('user', 'User name'); if (!pwv) throw new Error('Please fill in "Password".'); }
+    if (['ActiveDirectoryInteractive', 'ActiveDirectoryPassword'].includes(auth)) need('user', 'Email');
+    if (auth === 'ActiveDirectoryPassword' && !pwv) throw new Error('Please fill in "Password".');
+    return `mssql://${cred}${host}:1433/${enc(f('db'))}?schema=${enc(f('schema') || 'dbo')}&encrypt=yes` +
+           (auth === 'sql' ? '' : `&authentication=${auth}`);
+  }
+  const port = f('port') ? ':' + f('port') : '';
+  if (type === 'postgresql') return `postgresql://${cred}${f('host')}${port}/${enc(f('db'))}?schema=${enc(f('schema') || 'public')}`;
+  if (type === 'mysql') return `mysql://${cred}${f('host')}${port}/${enc(f('db'))}`;
+  return `mssql://${cred}${f('host')}/${enc(f('db'))}?${f('instance') ? 'instance=' + enc(f('instance')) + '&' : ''}schema=${enc(f('schema') || 'dbo')}`;
+}
+let PASTE = false;   // "I have a connection address": one box instead of the form
+function srcValue() {
+  if (!$('#srcSel').value) throw new Error('Choose a database first.');
+  if ($('#srcSel').value !== 'path') return $('#srcSel').value;
+  if (PASTE) { const v = $('#srcPath').value.trim(); if (!v) throw new Error('Please paste a connection address.'); return v; }
+  return buildDbUri();
+}
+function showOwnForm() {
+  const own = $('#srcSel').value === 'path';
+  $('#pathBox').classList.toggle('hidden', !own);
+  $('#typeBox').classList.toggle('hidden', !own || PASTE);
+  $('#dbFields').classList.toggle('hidden', PASTE);
+  $('#pasteBox').classList.toggle('hidden', !PASTE);
+  $('#pasteToggle').classList.toggle('hidden', !own);
+  $('#btnConnect').classList.toggle('hidden', !own);     // sample databases connect by themselves
+  $('#pasteToggle').textContent = PASTE ? 'Fill in the form instead' : 'I have a connection address';
+  if (own && !$('#dbFields').innerHTML) renderDbFields();
+  if (PASTE) $('#dbHint').innerHTML = 'Examples: <code>postgresql://user:pw@host:5432/db?schema=public</code>, <code>mysql://user:pw@host:3306/db</code>, <code>mssql://localhost/db?instance=SQLEXPRESS&amp;schema=dbo</code>, <code>mssql://user:pw@myserver.database.windows.net:1433/db?schema=dbo&amp;encrypt=yes</code> (Azure SQL), or a SQLite file path.';
+  else if (own) $('#dbHint').textContent = DB_TYPES[$('#dbType').value].hint;
+}
+$('#srcSel').onchange = () => {
+  // A new choice clears the previous connection, so steps 2 and 3 never show stale data.
+  CONN = null; SEL = null; PLAN = null;
+  $('#tables').innerHTML = ''; $('#tableDetail').innerHTML = ''; $('#planOut').innerHTML = ''; $('#migOut').innerHTML = '';
+  lock(2); lock(3);
+  showOwnForm();
+  if ($('#srcSel').value.startsWith('demo:')) $('#btnConnect').click();
+};
+$('#pasteToggle').onclick = () => { PASTE = !PASTE; showOwnForm(); };
+$('#dbType').onchange = renderDbFields;
+$('#btnConnect').onclick = e => busy(e.target, 'Connecting...', async () => {
+  try {
+    $('#tables').innerHTML = '';
+    const conn = await api('/api/connect', {source: srcValue()});
+    if (!conn.tables.length) throw new Error('Connected, but no tables were found there. Check the database or schema name.');
+    CONN = conn;
+    SEL = null; PLAN = null;
+    renderTables(); $('#tableDetail').innerHTML = ''; lock(2); lock(3);
+    if (CONN.tables.length) pickTable(CONN.tables[0].name);
+  } catch (err) { $('#tables').innerHTML = errBox(err, 'Could not connect.'); }
+});
+function lock(n, on = true) { $('#c' + n).classList.toggle('locked', on); }
+function renderTables() {
+  $('#tables').innerHTML = `<div class="chips">${CONN.tables.map(t =>
+    `<button class="chip ${SEL && SEL.name === t.name ? 'sel' : ''}" data-t="${esc(t.name)}">
+      <b>${esc(t.name)}</b><small>${t.row_count} rows${t.tier ? ' · ' + (t.tier === 'Easy' ? 'simple' : t.tier === 'Medium' ? 'some tricky columns' : 'many tricky columns') : ''}</small></button>`).join('')}</div>`;
+  document.querySelectorAll('[data-t]').forEach(b => b.onclick = () => pickTable(b.dataset.t));
+}
+function pickTable(name) {
+  SEL = CONN.tables.find(t => t.name === name); PLAN = null; OVERRIDES = {}; MASKS = {}; REVIEW_SEQ++;
+  renderTables();
+  const cols = SEL.columns;
+  const nPk = cols.filter(c => c.primary_key).length, nNull = cols.filter(c => c.nullable).length;
+  $('#tableDetail').innerHTML = `
+    <p class="tsum">Selected <b><code>${esc(SEL.name)}</code></b>: ${cols.length} columns and ${SEL.row_count} rows${nPk ? ', with an ID column' : ''}${nNull ? `; ${nNull} column${nNull > 1 ? 's' : ''} may be empty` : ''}. Continue with step 2 below.</p>
+    <details><summary>Show columns and sample rows</summary>
+    <div class="tablewrap"><table><tr><th>Column</th><th>Declared SQL type</th><th>Notes</th></tr>
+    ${cols.map(c => `<tr><td><code>${esc(c.name)}</code></td><td><code>${esc(c.declared_type)}</code></td>
+      <td>${c.primary_key ? '<span class="badge acc">primary key</span> ' : ''}${c.nullable ? '<span class="badge">may be empty</span>' : ''}
+      ${(SEL.foreign_keys.find(f => f.column === c.name) || null) ? `<span class="badge">links to ${esc(SEL.foreign_keys.find(f => f.column === c.name).ref_table)}</span>` : ''}</td></tr>`).join('')}
+    </table></div>
+    <p class="hint" style="margin:12px 0 4px">Sample rows</p>
+    <div class="tablewrap"><table>
+      <tr>${cols.map(c => `<th>${esc(c.name)}</th>`).join('')}</tr>
+      ${SEL.sample.map(r => `<tr>${cols.map(c => `<td class="mono">${val(r[c.name])}</td>`).join('')}</tr>`).join('')}
+    </table></div></details>`;
+  // Only date/time columns make sense for monthly folders (plus the table's usual choice).
+  const looksDate = c => SEL.sample.some(r => /^\d{4}-\d{2}-\d{2}/.test(String(r[c.name] ?? '')));
+  const datey = cols.filter(c => /DATE|TIME/i.test(c.declared_type || '') || looksDate(c) || c.name === SEL.partition_by);
+  $('#part').innerHTML = `<option value="">Don't split (one file)</option>` + datey.map(c =>
+    `<option value="${esc(c.name)}" ${c.name === SEL.partition_by ? 'selected' : ''}>${esc(c.name)}</option>`).join('');
+  $('#planOut').innerHTML = ''; $('#migOut').innerHTML = '';
+  lock(2, false); lock(3);
+}
+
+// ---------- step 2 ----------
+let MORE_OPEN = false;
+function renderStrats() {
+  const card = s => `
+    <div class="strat ${s.id === STRAT ? 'sel' : ''} ${s.available ? '' : 'off'}" data-s="${s.id}" role="radio" aria-checked="${s.id === STRAT}" tabindex="0">
+      <b><span class="radio"></span>${esc(s.name)} ${s.needs_key ? '<span class="badge acc">AI</span>' : ''}</b>
+      <span>${esc(s.description)}${s.available ? '' : '<br><i>Not set up yet: click for the steps</i>'}</span></div>`;
+  const main = INFO.strategies.filter(s => s.main !== false), extra = INFO.strategies.filter(s => s.main === false);
+  if (extra.some(s => s.id === STRAT)) MORE_OPEN = true;   // never hide the selected option
+  // One everyday method: show it as a short note, not as a one-item choice.
+  $('#strats').innerHTML = main.length === 1 && STRAT === main[0].id
+    ? `<div class="methodnote"><b>Method:</b> ${esc(main[0].description)}${aiReady() ? ' <span class="badge acc">+ AI review</span> After planning, the AI double-checks the mapping and looks for personal data in the background.' : ''}</div>`
+    : main.map(card).join('');
+  $('#stratsMore').innerHTML = `<p class="hint" style="grid-column:1/-1;margin:0">Kept for the research comparison: what happens without sample data (H1), with an AI that has no context (S1), and with the AI making the whole mapping (S3). Choose one to try it; click it again to go back to Standard.</p>` + extra.map(card).join('');
+  $('#stratsMore').classList.toggle('hidden', !MORE_OPEN || !extra.length);
+  $('#moreStrats').classList.toggle('hidden', !extra.length);
+  $('#moreStrats').textContent = MORE_OPEN ? 'Hide research methods' : `Compare with research methods (${extra.length})`;
+  $('#moreStrats').onclick = () => { MORE_OPEN = !MORE_OPEN; renderStrats(); };
+  document.querySelectorAll('[data-s]').forEach(d => {
+    const pick = () => {
+      const s = INFO.strategies.find(x => x.id === d.dataset.s);
+      if (!s.available) { showAiHelp(s.missing); return; }
+      $('#aiHelp').innerHTML = '';
+      STRAT = (STRAT === s.id && s.main === false) ? 'h2' : s.id;   // clicking a chosen research method again returns to Standard
+      renderStrats();
+    };
+    d.onclick = pick;
+    d.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } };
+  });
+}
+function showAiHelp(missing) {
+  if (INFO.public) {
+    $('#aiHelp').innerHTML = '<div class="banner warn" style="display:block"><b>AI strategies are not enabled on this shared demo.</b><p>The Standard option shows the same pipeline and is just as accurate. The AI option runs when the tool is installed on your own computer.</p></div>';
+    return;
+  }
+  const needModel = missing.find(m => m.startsWith('ollama_model:'));
+  const model = needModel ? needModel.split(':').slice(1).join(':') : 'qwen2.5:7b';
+  const steps = needModel
+    ? [`Ollama is running, but the model is not downloaded yet. In a terminal run: <code>ollama pull ${esc(model)}</code>`,
+       'When it finishes, reload this page.']
+    : ['Install <b>Ollama</b> (free) from <b>ollama.com/download</b> and open it once; it then runs in the background.',
+       `In a terminal, download a model (about 4.7 GB, one time): <code>ollama pull ${esc(model)}</code>`,
+       'Reload this page.'];
+  $('#aiHelp').innerHTML = `<div class="banner warn" style="display:block"><b>The AI strategies are not set up on this computer yet.</b>
+    <p style="margin:6px 0 0;font-weight:400;color:var(--ink)"><b>Free option (runs on this laptop, no account needed):</b></p>
+    <ol style="margin:4px 0 4px;font-weight:400;color:var(--ink)">${steps.map(x => `<li>${x}</li>`).join('')}</ol>
+    <p style="margin:0;font-weight:400;color:var(--ink)">Paid option: set <code>ANTHROPIC_API_KEY</code> (from platform.claude.com) and run <code>pip install anthropic</code> before starting the dashboard.
+    The Standard option works without any of this.</p></div>`;
+}
+const reqBody = () => ({source: CONN.source, table: SEL.name, strategy: STRAT, fmt: $('#fmt').value, partition_by: $('#part').value,
+                       destination: DEST, target_uri: DEST === 'local' ? '' : $('#destUri').value.trim(),
+                       overrides: STRAT === 'h2' ? OVERRIDES : {},
+                       masks: Object.keys(MASKS).filter(c => MASKS[c] === 'mask')});
+$('#btnPlan').onclick = e => busy(e.target, 'Planning...', async () => {
+  try { $('#planOut').innerHTML = '<div id="planProg"></div>'; OVERRIDES = {}; MASKS = {}; REVIEW_SEQ++;
+        PLAN = await runJob('plan', reqBody(), $('#planProg')); await ensureAi(); renderPlan(PLAN, $('#planOut')); lock(3, false); $('#migOut').innerHTML = '';
+        if (STRAT === 'h2') startReview(); }
+  catch (err) { $('#planOut').innerHTML = errBox(err); }
+});
+
+// ---------- AI assistant: review of the mapping + privacy check ----------
+let OVERRIDES = {}, REVIEW_SEQ = 0;
+const aiReady = () => !!(INFO && !INFO.public && (INFO.strategies.find(s => s.id === 's3') || {}).available);
+const typeLine = o => `${TYPE_TEXT(o.target_type)}${o.transform !== 'none' ? ', ' + (TRANSFORM_TEXT[o.transform] || o.transform) : ''}${o.null_handling !== 'preserve' ? ', empty values: ' + o.null_handling : ''}`;
+let MASKS = {}, PRIV = {list: [], fromAi: false, pending: false};   // MASKS: column -> 'mask' | 'keep'
+function renderPrivacy(list, fromAi, pending = false) {
+  PRIV = {list, fromAi, pending};
+  const box = $('#privacyBox'); if (!box) return;
+  if (!list.length) {
+    box.innerHTML = `<div class="assist"><h3>🔒 Privacy check <span class="badge ok">nothing found</span></h3><p class="hint" style="margin:0">No columns look like personal data${fromAi ? ' (checked by rules and the AI)' : pending ? ' so far; the AI is still checking the values' : ''}.</p></div>`;
+    return;
+  }
+  const blocked = (PLAN && PLAN.mask_blocked) || {};
+  const open = list.filter(s => !MASKS[s.column] && !blocked[s.column]).length;
+  const nMasked = list.filter(s => MASKS[s.column] === 'mask').length;
+  box.innerHTML = `<div class="assist"><h3>🔒 Privacy check: ${list.length} column${list.length > 1 ? 's' : ''} may hold personal data</h3>
+    <p class="hint"><b>Do you want to mask ${list.length > 1 ? 'these columns' : 'this column'} before they go to the cloud?</b> Masking hides the personal part (see the example) and cannot be undone in the copy; your source database is not changed.${pending ? ' The AI is still checking the values and may add more.' : ''}</p>
+    ${list.map(s => { const st = MASKS[s.column], why = blocked[s.column];
+      return `<div class="flag ${st === 'mask' ? 'accepted' : st === 'keep' ? 'kept' : ''}" data-c="${esc(s.column)}" style="border-left-color:${st === 'mask' ? 'var(--ok)' : 'var(--warn)'}">
+        <b><code>${esc(s.column)}</code></b> ${esc(s.kind)}${s.found_by === 'AI' ? ' <span class="badge acc">found by AI</span>' : ''}
+        ${st === 'mask' ? '<span class="badge ok">will be masked</span>' : st === 'keep' ? '<span class="badge">kept as is</span>' : ''}
+        ${s.example ? `<div class="chg">Example: <code>${esc(s.example.before)}</code> &rarr; <code>${esc(s.example.after)}</code></div>` : ''}
+        <div class="hint" style="margin:0">${esc(s.reason)}</div>
+        ${why ? `<div class="hint" style="margin:4px 0 0">Cannot be masked because ${esc(why)}.</div>`
+              : `<div class="btns"><button class="${st === 'mask' ? 'ghost' : 'primary'}" data-act="mask">${st === 'mask' ? 'Masked ✓' : 'Mask it'}</button><button class="ghost" data-act="keep">Keep as is</button></div>`}</div>`; }).join('')}
+    ${open > 1 ? '<div class="btns" style="margin-top:6px"><button class="ghost" id="maskAll">Mask all of them</button></div>' : ''}
+    ${nMasked ? `<p class="hint" style="margin:8px 0 0">${nMasked} column${nMasked > 1 ? 's' : ''} will be masked in the migration. The checks then compare masked values on both sides.</p>` : ''}</div>`;
+  box.querySelectorAll('.flag').forEach(el => el.querySelectorAll('button').forEach(b => b.onclick = () => {
+    MASKS[el.dataset.c] = b.dataset.act; renderPrivacy(PRIV.list, PRIV.fromAi, PRIV.pending);
+  }));
+  const all = $('#maskAll');
+  if (all) all.onclick = () => { list.forEach(s => { if (!blocked[s.column]) MASKS[s.column] = 'mask'; }); renderPrivacy(PRIV.list, PRIV.fromAi, PRIV.pending); };
+}
+function renderFlags(flags) {
+  const box = $('#reviewBox'); if (!box) return;
+  if (!flags.length) {
+    box.innerHTML = `<div class="assist"><h3>🤖 AI review <span class="badge ok">no concerns</span></h3><p class="hint" style="margin:0">The AI checked every column and agrees with the mapping.</p></div>`;
+    return;
+  }
+  box.innerHTML = `<div class="assist"><h3>🤖 AI review: ${flags.length} suggestion${flags.length > 1 ? 's' : ''}</h3>
+    <p class="hint">The AI disagrees with these columns. Accept a suggestion to use it in the migration, or keep the current choice. Accepted changes are tested by the dry run again, and the checks follow the new types.</p>
+    ${flags.map((f, i) => { const st = OVERRIDES[f.column] ? 'accepted' : f._kept ? 'kept' : '';
+      return `<div class="flag ${st}" data-i="${i}"><b><code>${esc(f.column)}</code></b> ${st === 'accepted' ? '<span class="badge ok">accepted: will be used</span>' : st === 'kept' ? '<span class="badge">kept as is</span>' : ''}
+        <div class="chg">Now: ${esc(typeLine(f.current))}<br>AI suggests: <b>${esc(typeLine(f.suggested))}</b></div>
+        <div class="hint" style="margin:0">${esc(f.reason)}</div>
+        <div class="btns"><button class="primary" data-act="accept">Accept</button><button class="ghost" data-act="keep">Keep current</button></div></div>`; }).join('')}</div>`;
+  box.querySelectorAll('.flag').forEach(el => el.querySelectorAll('button').forEach(b => b.onclick = () => {
+    const f = flags[+el.dataset.i];
+    if (b.dataset.act === 'accept') { OVERRIDES[f.column] = f.suggested; f._kept = false; }
+    else { delete OVERRIDES[f.column]; f._kept = true; }
+    renderFlags(flags);
+  }));
+}
+async function ensureAi() {
+  // Right after the dashboard starts, the AI status may not be known yet: ask again once.
+  if (aiReady() || !INFO || INFO.public) return aiReady();
+  try { const fresh = await api('/api/info'); INFO.strategies = fresh.strategies; renderStrats(); } catch (e) { /* keep old */ }
+  return aiReady();
+}
+async function startReview() {
+  if (!(await ensureAi())) {
+    if (!INFO.public) $('#reviewBox').innerHTML = `<div class="assist"><h3>🤖 AI review <span class="badge">off</span></h3><p class="hint" style="margin:0">Start Ollama to get a second opinion on the mapping and a deeper privacy check. Everything else works without it.</p></div>`;
+    return;
+  }
+  const seq = REVIEW_SEQ, body = {source: CONN.source, table: SEL.name, strategy: 'h2', fmt: $('#fmt').value, partition_by: $('#part').value};
+  $('#reviewBox').innerHTML = `<div class="assist"><h3>🤖 AI review <span class="badge acc">working in the background</span></h3>
+    <p class="hint" style="margin:0">The AI is double-checking each column and looking for personal data. This usually takes under a minute; you can carry on and run the migration meanwhile.</p><div id="reviewProg"></div></div>`;
+  try {
+    const r = await runJob('review', body, $('#reviewProg'));
+    if (seq !== REVIEW_SEQ) return;              // the user planned another table meanwhile
+    renderFlags(r.flags || []); renderPrivacy(r.sensitive || [], true);
+  } catch (err) {
+    if (seq === REVIEW_SEQ) $('#reviewBox').innerHTML = `<div class="assist"><h3>🤖 AI review <span class="badge warn">unavailable</span></h3><p class="hint" style="margin:0">${esc(err.message || err)} The mapping above is still complete and safe to use.</p></div>`;
+  }
+}
+function renderPlan(p, el) {
+  const decl = c => {   // what a naive mapping from the declared type alone would give
+    const d = (c.declared_type || '').toUpperCase();
+    return /DECIMAL|NUMERIC/.test(d) ? 'decimal' : /INT/.test(d) ? 'int64' : /JSON/.test(d) ? 'json_string' :
+           /TIME ZONE/.test(d) ? 'timestamp_tz' : /BOOL/.test(d) ? 'bool' : null;
+  };
+  const surprising = c => {
+    const d = (c.declared_type || '').toUpperCase(), t = c.target_type;
+    return (/INT/.test(d) && t === 'bool') || (/CHAR|TEXT/.test(d) && t !== 'string') || (d === 'NUMERIC' && t.startsWith('decimal'));
+  };
+  const probs = p.dry_run_problems;
+  el.innerHTML = `
+    ${probs.length ? `<div class="banner warn"><span class="big">!</span><div>The dry run found ${probs.length} problem(s) with this plan<p>${probs.map(esc).join('<br>')}</p></div></div>`
+      : `<div class="banner ok"><span class="big">✓</span><div>Dry run passed<p>The plan was tested on ${esc(p.table)}'s sample rows and nothing would be lost.</p></div></div>`}
+    <div class="tablewrap"><table>
+      <tr><th>Source column</th><th>Declared type</th><th>What the sample values look like</th><th></th><th>Becomes in output</th><th>Conversion</th></tr>
+      ${p.columns.map(c => `<tr class="${surprising(c) ? 'changed' : ''}">
+        <td><code>${esc(c.source)}</code></td><td><code>${esc(c.declared_type)}</code></td>
+        <td>${esc(c.shape)}<br><span class="mono" style="color:var(--muted)">${c.samples.map(val).join(', ')}</span></td>
+        <td class="arrow">→</td>
+        <td><b>${esc(TYPE_TEXT(c.target_type))}</b><br><code style="color:var(--muted)">${esc(c.target_type)}</code>
+          ${surprising(c) ? '<br><span class="badge warn">detected from sample values</span>' : ''}</td>
+        <td>${esc(TRANSFORM_TEXT[c.transform] || c.transform)}${c.null_handling !== 'preserve' ? `<br><span class="badge bad">NULL → ${esc(c.null_handling)}</span>` : ''}</td></tr>`).join('')}
+    </table></div>
+    <p class="hint" style="margin-top:8px">Highlighted rows are columns whose declared type is misleading; the right type was worked out from the actual values.</p>
+    <h3 style="margin:16px 0 4px">${p.rules.length} checks will run after the migration</h3>
+    <p class="hint" style="margin:0 0 6px">Picked automatically from each column's type: money gets an exact-total check, date-times a time-zone check, columns that may be empty a NULL check, and so on. Hover over a check to see why it is there.</p>
+    <div class="chips" style="margin-top:4px">${p.rules.map(r => `<span class="badge ${r.origin === 'deterministic' ? '' : 'acc'}" title="${esc(r.rationale)}">
+      ${esc((RULE_TEXT[r.kind] || [r.kind])[0])}${r.column ? ': ' + esc(r.column) : ''}</span>`).join('')}</div>
+    <details><summary>Technical log</summary><div class="log">${p.log.map(esc).join('\n')}</div></details>
+    <div id="reviewBox"></div>
+    <div id="privacyBox"></div>
+    <div class="nextrow"><button class="primary" id="goStep3">Looks good: next, choose where to save &darr;</button></div>`;
+  renderPrivacy(p.sensitive || [], false, STRAT === 'h2' && aiReady());
+  $('#goStep3').onclick = () => $('#c3').scrollIntoView({behavior: 'smooth', block: 'start'});
+}
+
+// ---------- destinations ----------
+let DEST = 'local';
+function destStatus(d) {
+  if (d.id === 'local') return '<span class="badge ok">ready</span>';
+  if (!d.package_ok) return '<span class="badge warn">one-time setup needed</span>';
+  if (!d.creds_ok) return '<span class="badge warn">sign-in needed</span>';
+  return '<span class="badge ok">ready</span>';
+}
+function renderDests() {
+  $('#dests').innerHTML = INFO.destinations.map(d => `
+    <div class="strat ${d.id === DEST ? 'sel' : ''}" data-d="${d.id}">
+      <b>${esc(d.name)}</b><span>${destStatus(d)}</span></div>`).join('');
+  document.querySelectorAll('[data-d]').forEach(el => el.onclick = () => pickDest(el.dataset.d));
+}
+function pickDest(id) {
+  const prev = INFO.destinations.find(x => x.id === DEST), d = INFO.destinations.find(x => x.id === id);
+  if (!$('#destUri').value || (prev && $('#destUri').value === prev.example)) $('#destUri').value = d.example;
+  DEST = id; renderDests();
+  const local = id === 'local';
+  $('#destUri').disabled = local;
+  if (local) $('#destUri').value = d.example;
+  $('#destLabel').textContent = local ? 'Folder on this computer' : 'Location (bucket / container and path)';
+  $('#destHelp').innerHTML = (d.package && !d.package_ok ? `<b>One-time setup:</b> in a terminal run <code>pip install ${esc(d.package)}</code>, then restart the dashboard. ` : '') + esc(d.help);
+  $('#destTest').innerHTML = '';
+}
+$('#btnTestDest').onclick = e => busy(e.target, 'Testing...', async () => {
+  try {
+    const r = await api('/api/test_destination', {destination: DEST, target_uri: $('#destUri').value});
+    $('#destTest').innerHTML = `<div class="banner ${r.ok ? 'ok' : 'bad'}"><span class="big">${r.ok ? '✓' : '✗'}</span><div>${r.ok ? 'Destination works' : 'Could not use this destination'}<p>${esc(r.message)}</p></div></div>`;
+  } catch (err) { $('#destTest').innerHTML = errBox(err); }
+});
+
+// ---------- step 3 ----------
+$('#btnMigrate').onclick = e => busy(e.target, 'Migrating...', async () => {
+  if (DEST !== 'local' && !$('#destUri').value.trim()) { $('#migOut').innerHTML = errBox('Enter a destination location first.'); return; }
+  try { $('#migOut').innerHTML = '<div id="migProg"></div>';
+        renderMigration(await runJob('migrate', reqBody(), $('#migProg'))); }
+  catch (err) { $('#migOut').innerHTML = errBox(err); }
+});
+function resultTable(results, onlyFailed = false) {
+  const rows = onlyFailed ? results.filter(r => !r.passed) : results;
+  if (!rows.length) return '';
+  return `<div class="tablewrap"><table><tr><th>Result</th><th>Check</th><th>Column</th><th>Source</th><th>Output</th></tr>
+    ${rows.map(r => { const [name, help] = RULE_TEXT[r.rule.kind] || [r.rule.kind, ''];
+      return `<tr><td>${r.passed ? '<span class="badge ok">PASS</span>' : '<span class="badge bad">FAIL</span>'}</td>
+        <td><b>${esc(name)}</b><br><span style="color:var(--muted);font-size:12.5px">${esc(help)}</span>
+        ${r.passed ? '' : `<br><span style="color:var(--bad);font-size:12.5px">${esc(FP.has(r.rule.kind) ? 'Some values in the output differ from the source.' : r.detail)}</span>`}</td>
+        <td>${r.rule.column ? `<code>${esc(r.rule.column)}</code>` : '<span class="null">whole table</span>'}</td>
+        ${FP.has(r.rule.kind) ? `<td colspan="2">${r.passed ? 'fingerprints match' : '<b style="color:var(--bad)">fingerprints differ</b>'}</td>`
+          : `<td class="mono">${val(short(r.source))}</td><td class="mono">${val(short(r.target))}</td>`}</tr>`; }).join('')}
+  </table></div>`;
+}
+const FP = new Set(['column_checksum', 'timestamp_exact', 'json_roundtrip']);
+const short = v => (v && typeof v === 'object') ? Object.keys(v).length + ' entries' : v;
+function renderMigration(m) {
+  if (m.error) { $('#migOut').innerHTML = errBox(m.error) + `<div class="log">${m.log.map(esc).join('\n')}</div>`; return; }
+  const s = m.summary, pass = s.status === 'PASS';
+  const cols = m.preview.length ? Object.keys(m.preview[0]) : [];
+  $('#migOut').innerHTML = `
+    <div class="banner ${pass ? 'ok' : 'bad'}"><span class="big">${pass ? '✓' : '✗'}</span><div>
+      ${pass ? `Migration complete: all ${s.rules} checks passed. The files are a faithful copy of the table.` : `${s.failed} of ${s.rules} checks failed. The output does NOT match the source; see the red rows below.`}
+      <p>Every number below was recomputed from the database and from the written files; nothing is taken on trust.</p>
+      ${pass ? `<p style="margin-top:6px"><button class="linkbtn" id="testChecks" style="margin:0">Want to see these checks catch an error? Test the checks &rarr;</button></p>` : ''}</div></div>
+    <div id="summaryBox"></div>
+    <div class="stats">
+      <div class="stat"><b>${m.rows_read}</b><span>rows read from database</span></div>
+      <div class="stat"><b>${m.rows_written}</b><span>rows written to files</span></div>
+      <div class="stat"><b>${m.files.length}</b><span>output file${m.files.length === 1 ? '' : 's'}</span></div>
+      <div class="stat"><b>${m.seconds}s</b><span>total time</span></div>
+    </div>
+    <div class="nextrow">
+      ${m.downloadable ? `<a class="dl" style="margin:0" href="/api/jobs/${m.job_id}/download">Download files and report (.zip)</a>` : ''}
+      <button class="ghost" id="again">Migrate another table &uarr;</button>
+      ${m.downloadable ? '<span class="hint" style="margin:0">Downloads are kept for 30 minutes.</span>' : ''}
+    </div>
+    <h3 style="margin:18px 0 6px">What was checked</h3>
+    ${resultTable(m.results)}
+    <details><summary>Output files (${m.files.length})</summary>
+      <p class="hint">Saved at <code>${esc(m.output_dir)}</code></p>
+      <div class="tablewrap"><table><tr><th>File</th><th>Rows</th></tr>
+      ${m.files.map(f => `<tr><td class="mono">${esc(f.key)}</td><td>${f.rows}</td></tr>`).join('')}</table></div></details>
+    <details><summary>Preview of the written data</summary><div class="tablewrap"><table>
+      <tr>${cols.map(c => `<th>${esc(c)}</th>`).join('')}</tr>
+      ${m.preview.map(r => `<tr>${cols.map(c => `<td class="mono">${val(r[c])}</td>`).join('')}</tr>`).join('')}</table></div></details>`;
+  $('#again').onclick = () => $('#c1').scrollIntoView({behavior: 'smooth', block: 'start'});
+  if ($('#testChecks')) $('#testChecks').onclick = () => openTestChecks(CONN && CONN.source, SEL && SEL.name);
+  $('#migOut').scrollIntoView({behavior: 'smooth', block: 'nearest'});
+  if (m.job_id) ensureAi().then(ok => { if (ok) startSummary(m.job_id, m.downloadable); });
+}
+async function startSummary(jobId, downloadable) {
+  const box = $('#summaryBox');
+  box.innerHTML = `<div class="aibox"><b>📝 Migration summary</b><p class="hint" style="margin:4px 0 0">The AI is writing a short plain-English summary (about a minute).</p><div id="sumProg"></div></div>`;
+  try {
+    const r = await runJob('summary', {job_id: jobId}, $('#sumProg'));
+    if (!document.body.contains(box)) return;
+    box.innerHTML = `<div class="aibox"><b>📝 Migration summary</b> <span class="badge ${r.by === 'AI' ? 'acc' : ''}">${r.by === 'AI' ? 'written by AI' : 'standard summary'}</span>
+      <p>${esc(r.text)}</p>
+      <p class="hint" style="margin:0">${esc(r.note)}${downloadable ? ' Also saved as summary.md in the download.' : ''}
+      <button class="linkbtn" id="copySum" style="margin:0 0 0 8px">Copy</button></p></div>`;
+    $('#copySum').onclick = async () => { try { await navigator.clipboard.writeText(r.text); $('#copySum').textContent = 'Copied'; } catch (e) { $('#copySum').textContent = 'Copy failed'; } };
+  } catch (err) {
+    if (document.body.contains(box)) box.innerHTML = `<div class="aibox"><b>📝 Summary</b><p class="hint" style="margin:4px 0 0">The AI could not write a summary: ${esc(err.message || err)}</p></div>`;
+  }
+}
+
+// ---------- break ----------
+const FAULT_NAME = {
+  truncated_decimal: 'Money values rounded (decimals cut off)',
+  dropped_null_row: 'A row with empty values went missing',
+  duplicated_row: 'A row copied twice',
+  timezone_shift: 'Times shifted by the time zone',
+  off_by_one_partition: 'Rows put in the wrong month folder',
+  flattened_json: 'JSON data flattened (structure lost)',
+};
+async function openTestChecks(source, table) {
+  // Open "Test the checks" on the table just migrated (sample databases only; own databases are never damaged).
+  document.querySelector('[data-tab="break"]').click();
+  window.scrollTo({top: 0, behavior: 'smooth'});
+  try {
+    await syncBreak();
+    if (source && source.startsWith('demo:')) {
+      $('#bSrc').value = source; await loadBreakTables();
+      if ([...$('#bTable').options].some(o => o.value === table)) $('#bTable').value = table;
+    }
+  } catch (e) { /* the tab still works with its defaults */ }
+}
+let BREAK_READY = null;   // one shared load, so early clicks wait for the table list
+function syncBreak() {
+  if (!BREAK_READY) BREAK_READY = initBreak().catch(err => { BREAK_READY = null; throw err; });
+  return BREAK_READY;
+}
+async function initBreak() {
+  {
+    $('#bSrc').innerHTML = INFO.demos.map(d => `<option value="${d.id}">${esc(d.name)}</option>`).join('');
+    $('#bFault').innerHTML = INFO.injections.map(i => `<option value="${i.id}">${esc(FAULT_NAME[i.id] || i.id.replace(/_/g, ' '))}</option>`).join('');
+    $('#bSrc').onchange = loadBreakTables;
+    $('#bFault').onchange = () => $('#bFaultText').textContent = INFO.injections.find(i => i.id === $('#bFault').value).description;
+    $('#bFault').value = 'timezone_shift'; $('#bFault').onchange();
+    $('#bSrc').value = 'demo:ecommerce';
+    await loadBreakTables();
+  }
+}
+async function loadBreakTables() {
+  const c = await api('/api/connect', {source: $('#bSrc').value});
+  $('#bTable').innerHTML = c.tables.map(t => `<option data-p="${esc(t.partition_by || '')}">${esc(t.name)}</option>`).join('');
+  const pick = c.tables.find(t => t.tier === 'Hard') || c.tables[0];
+  $('#bTable').value = pick.name;
+}
+$('#btnBreak').onclick = e => busy(e.target, 'Running...', async () => {
+  try {
+    await syncBreak();
+    const opt = $('#bTable').selectedOptions[0];
+    $('#breakOut').innerHTML = '<div id="breakProg"></div>';
+    const r = await runJob('break', {source: $('#bSrc').value, table: $('#bTable').value, injection: $('#bFault').value,
+                                     strategy: 'h2', partition_by: opt.dataset.p}, $('#breakProg'));
+    if (!r.applicable) { $('#breakOut').innerHTML = `<div class="banner warn"><span class="big">i</span><div>${esc(r.message)}</div></div>`; return; }
+    const [gen, ours] = r.rule_sets, gCaught = gen.summary.status === 'FAIL', oCaught = ours.summary.status === 'FAIL';
+    const where = Object.keys(ours.summary.failed_by_column || {}).filter(c => c !== '<table>');
+    const fault = (FAULT_NAME[$('#bFault').value] || 'the fault').toLowerCase();
+    const verdict = !gCaught && oCaught
+      ? `<b>Ordinary checks missed it; this tool caught it.</b>Row counts still matched, so a typical migration would have been signed off as correct. The schema-aware checks found "${esc(fault)}"${where.length ? ` in ${where.map(c => `<code>${esc(c)}</code>`).join(', ')}` : ''}.`
+      : gCaught && oCaught
+      ? `<b>Both caught it.</b>This fault changes the row count or the file structure, so even ordinary checks notice. Try "Money values rounded" or "Times shifted" to see the difference.`
+      : `<b>Neither set of checks raised an alarm.</b>See the details below.`;
+    $('#breakOut').innerHTML = `<div class="verdict">${verdict}</div><div class="two">${r.rule_sets.map(rs => {
+      const caught = rs.summary.status === 'FAIL';
+      return `<div><h3 style="margin:10px 0 4px">${esc(rs.name)}</h3>
+        <div class="banner ${caught ? 'ok' : 'bad'}"><span class="big">${caught ? '✓' : '✗'}</span><div>
+          ${caught ? 'Fault detected' : 'Fault MISSED: this damaged output would be signed off as correct'}
+          <p>${rs.summary.rules} checks ran, ${rs.summary.failed} raised an alarm.</p></div></div>
+        ${caught ? resultTable(rs.results, true) : ''}</div>`; }).join('')}</div>`;
+  } catch (err) { $('#breakOut').innerHTML = errBox(err); }
+});
+
+// ---------- results ----------
+let RES_LOADED = false;
+async function loadResults() {
+  if (RES_LOADED) return;
+  try {
+    const r = await api('/api/results');
+    RES_LOADED = true;
+    if (!r.available) { $('#resOut').innerHTML = `<div class="card">No results yet. In a terminal run <code>python -m eval.run_eval</code>, then reopen this tab.</div>`; return; }
+    const R = r.rulesets || {}, names = Object.keys(R), colors = ['var(--muted)', '#c98a12', 'var(--accent)'];
+    const kinds = names.length ? Object.keys(R[names[0]].recall_by_injection) : [];
+    const S = r.strategies;
+    const byId = Object.fromEntries(S.map(s => [s.strategy, s]));
+    const pct = x => Math.round(x * 100) + '%';
+    const sa = R['Schema-aware (typed rules from mapping)'], ge = R['Generic (row count + schema)'];
+    const findings = [
+      sa && ge ? `<b>Ordinary checks are not enough.</b> Row-count checks caught ${pct(ge.recall)} of the injected faults and none of the rounded money or shifted times. This tool's schema-aware checks caught ${pct(sa.recall)}, with ${sa.false_positive_runs} false alarms.` : '',
+      byId.h1 && byId.h2 ? `<b>Looking at the data matters.</b> Reading only the declared types got ${pct(byId.h1.MA_F1)} of columns right; also reading sample values and past migrations got ${pct(byId.h2.MA_F1)}.` : '',
+      byId.s1 && byId.s3 ? `<b>The AI needs context.</b> Asked cold, the AI got ${pct(byId.s1.MA_F1)} of columns right; with samples and past examples, ${pct(byId.s3.MA_F1)}.` : '',
+      byId['s3+code'] ? `<b>Best of both.</b> Letting the AI map but code choose the checks gave ${pct(byId['s3+code'].MA_F1)} mapping accuracy, ${pct(byId['s3+code'].RF_R)} of faults caught and ${byId['s3+code'].false_positive_runs} false alarms. The dashboard's AI-assisted option works this way.` : '',
+    ].filter(Boolean);
+    $('#resOut').innerHTML = `
+      ${findings.length ? `<div class="card"><h2>Key findings in plain words</h2><ul class="findings">${findings.map(f => `<li>${f}</li>`).join('')}</ul>
+        <p class="hint" style="margin:10px 0 0">The details are below. Strategy names: H1/H2 are rule-based (no AI), S1/S3 use a free AI model running on this computer.</p></div>` : ''}
+      <div class="card"><h2>What the experiments show</h2><p class="hint">${esc(r.corpus)}</p>
+        <p>We migrated every table correctly, injected one known fault at a time, and counted how often each set of checks raised an alarm (higher is better).</p>
+        <div class="legend">${names.map((n, i) => `<span><span class="sw" style="background:${colors[i]}"></span>${esc(n)}</span>`).join('')}</div>
+        ${kinds.map(k => `<div style="margin:12px 0 4px;font-weight:600">${esc(k.replace(/_/g, ' '))}</div>` +
+          names.map((n, i) => { const v = R[n].recall_by_injection[k];
+            return `<div class="barrow"><span style="color:var(--muted)">${esc(n.split(' (')[0])}</span>
+              <div class="bartrack"><div class="bar" style="width:${v * 100}%;background:${colors[i]}"></div></div><b>${Math.round(v * 100)}%</b></div>`; }).join('')).join('')}
+        <p class="hint" style="margin-top:14px">Generic row-count checks never notice truncated decimals or time-zone shifts; the schema-aware checks catch all of them, with no false alarms on undamaged data.</p>
+      </div>
+      ${S.length ? `<div class="card"><h2>Mapping strategies compared</h2>
+        <p class="hint">${esc(r.backend || '')}${r.llm ? ' &middot; AI model: ' + esc(r.llm.replace(/^\w+Client\s*/, '')) + ' (free, running locally)' : ''}</p>
+        <div class="tablewrap"><table><tr><th>Strategy</th><th>Mapping accuracy (F1)</th><th>Faults detected</th><th>False alarms (clean runs)</th><th>Composite score</th><th>Seconds / table</th></tr>
+        ${S.map(s => `<tr><td>${esc(s.label)}</td><td>${s.MA_F1.toFixed(2)}</td><td>${Math.round(s.RF_R * 100)}%</td><td>${s.false_positive_runs} / ${s.clean_runs}</td><td>${s.CMS.toFixed(2)}</td><td>${s.avg_seconds.toFixed(2)}</td></tr>`).join('')}
+        </table></div>
+        ${S.some(s => /^S\d/.test(s.label)) ? `<p class="hint" style="margin-top:10px"><b>What the AI results show.</b> Asked cold (S1), the AI maps only about two-thirds of columns correctly. Given schema details, sample values and past examples (S3), it reaches 0.99, matching the best rule-based method. But the <i>checks</i> the AI writes are weaker: it often names no column, or treats a repeated foreign key as unique, which causes false alarms on undamaged data, and it misses most rounding and time-zone faults. The tool always computes every check's numbers itself, so the AI never does the arithmetic; but with S1/S3 the AI also chooses which checks to run. The <b>hybrid</b> rows keep the AI's mapping but let ordinary code generate the checks from it: S3's hybrid then catches every injected fault with no false alarms, while keeping 0.99 mapping accuracy. <i>AI is good at mapping; code is better at choosing checks.</i> ${esc(r.note || '')}</p>` : ''}
+        <h3 style="margin:16px 0 6px">Mapping accuracy by difficulty</h3>
+        <div class="tablewrap"><table><tr><th>Strategy</th>${Object.keys(S[0].MA_by_tier).map(t => `<th>${esc(t)}</th>`).join('')}</tr>
+        ${S.map(s => `<tr><td>${esc(s.label)}</td>${Object.values(s.MA_by_tier).map(v => `<td>${v.toFixed(2)}</td>`).join('')}</tr>`).join('')}
+        </table></div>
+        ${S.some(s => /^S\d/.test(s.label)) ? '' : `<p class="hint" style="margin-top:10px">To add the AI strategies, start Ollama and run <code>python -m eval.run_eval --provider ollama --strategies h1,h2,s1,s3</code>.</p>`}</div>` : ''}`;
+  } catch (err) { $('#resOut').innerHTML = `<div class="card">${errBox(err)}</div>`; }
+}
+
+// ---------- start ----------
+(async () => {
+  try {
+    INFO = await api('/api/info');
+    const samples = INFO.demos.map(d => `<option value="${d.id}">Sample: ${esc(d.name)} (${d.tables} tables)</option>`).join('');
+    $('#srcSel').innerHTML = INFO.public ? samples
+      : `<option value="" selected disabled>Choose a database...</option>
+         <optgroup label="Your database"><option value="path">Connect my own database...</option></optgroup>
+         <optgroup label="Try the tool with sample data">${samples}</optgroup>`;
+    renderStrats(); renderDests(); pickDest('local');
+    if (INFO.public) {
+      $('#destRow').classList.add('hidden');
+      $('#dests').insertAdjacentHTML('afterend', '<p class="pubnote">This is a shared demo: your results are private to you and can be downloaded after each migration. Connecting your own databases and cloud storage is available when the tool runs on your own computer.</p>');
+    }
+    if (INFO.public) $('#c1 .hint').innerHTML = 'A sample database is already connected below; pick any table, or switch to one of the other five samples.';
+    showOwnForm();
+    // Shared demo: only samples exist, so connect the first one right away.
+    if (INFO.public) $('#btnConnect').click();
+    let seen = false;
+    try { seen = localStorage.getItem('amt_guide_seen') === '1'; } catch (e) { /* storage unavailable */ }
+    if (!seen) $('#guide').classList.remove('hidden');
+    // If the AI was not ready when the page opened (e.g. Ollama still starting),
+    // keep checking and switch the AI options on as soon as it is.
+    if (!INFO.public && INFO.strategies.some(s => !s.available)) {
+      const recheck = setInterval(async () => {
+        try {
+          const fresh = await api('/api/info');
+          const was = INFO.strategies.map(s => s.available).join();
+          INFO.strategies = fresh.strategies;
+          if (fresh.strategies.map(s => s.available).join() !== was) renderStrats();
+          if (fresh.strategies.every(s => s.available)) clearInterval(recheck);
+        } catch (e) { /* server busy or restarting: try again next time */ }
+      }, 10000);
+    }
+    $('#guideClose').onclick = () => { $('#guide').classList.add('hidden'); try { localStorage.setItem('amt_guide_seen', '1'); } catch (e) {} };
+    if (location.hash === '#demo-plan') {    // used to produce the report's screenshot
+      $('#guide').classList.add('hidden');
+      $('#srcSel').value = 'demo:ecommerce'; $('#srcSel').onchange();
+      for (let i = 0; i < 50 && !document.querySelector('[data-t="customers"]'); i++) await sleep(100);
+      pickTable('customers');
+      $('#btnPlan').click();
+    }
+    if (location.hash === '#demo-break') {   // used to produce the paper's screenshot
+      document.querySelector('[data-tab="break"]').click();
+      await syncBreak();
+      $('#btnBreak').click();
+    }
+  } catch (err) { document.querySelector('main').insertAdjacentHTML('afterbegin', errBox(err)); }
+})();
+</script>
+</body>
+</html>
